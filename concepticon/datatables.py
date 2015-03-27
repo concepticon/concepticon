@@ -48,6 +48,7 @@ class Concepts(Values):
         res = [
             ConceptIdCol(self, 'id', sClass='left'),
             LinkCol(self, 'name', sTitle='Gloss'),
+            Col(self, 'description', sTitle='Source languages')
         ]
         if self.parameter:
             res.append(LinkCol(self, 'conceptlist', get_object=lambda v: v.valueset.contribution))

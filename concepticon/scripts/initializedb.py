@@ -62,6 +62,8 @@ def main(args):
             langs.extend(split(rec['source_language']))
             source.conceptlist = data['Conceptlist'][rec.id]
             data['Conceptlist'][rec.id].description = source.note
+            data['Conceptlist'][rec.id].source_languages = ' '.join(split(rec['source_language']))
+            data['Conceptlist'][rec.id].target_languages = rec.get('target_language')
 
         data.add(models.Ref, rec.id, _obj=source)
 
@@ -85,6 +87,7 @@ def main(args):
 
     for fname in conceptlists:
         conceptlist = data['Conceptlist'][fname.namebase]
+        langs = conceptlist.source_languages.split()
         numbers = []
         for concept in reader(fname, namedtuples=True):
             sc += 1
@@ -101,26 +104,31 @@ def main(args):
                 continue
 
             id_ = '%s--%s' % (fname.namebase, number)
-            try:
-                match = number_pattern.match(number)
-                gloss = concept.GLOSS if hasattr(concept, 'GLOSS') else concept.ENGLISH
-                vs = data.add(
-                    common.ValueSet, id_,
-                    id=id_,
-                    description=gloss,
-                    language=english,
-                    contribution=conceptlist,
-                    parameter=data['DefinedConcept'][concept.OMEGAWIKI])
-                data.add(
-                    models.Concept, id_,
-                    id=id_,
-                    valueset=vs,
-                    name=gloss,
-                    number=int(match.group('number')),
-                    number_suffix=match.group('suffix'))
-            except AttributeError:
-                print fname
-                raise
+            otherlgs = {}
+            for lang in langs:
+                if lang != 'english':
+                    if getattr(concept, lang.upper(), None):
+                        otherlgs[lang] = getattr(concept, lang.upper())
+            match = number_pattern.match(number)
+            gloss = concept.GLOSS if hasattr(concept, 'GLOSS') else concept.ENGLISH
+            vs = data.add(
+                common.ValueSet, id_,
+                id=id_,
+                description=gloss,
+                language=english,
+                contribution=conceptlist,
+                parameter=data['DefinedConcept'][concept.OMEGAWIKI])
+            v = data.add(
+                models.Concept, id_,
+                id=id_,
+                valueset=vs,
+                name=gloss,
+                description='; '.join('%s [%s]' % (otherlgs[l], l) for l in sorted(otherlgs.keys())),
+                number=int(match.group('number')),
+                number_suffix=match.group('suffix'))
+            DBSession.flush()
+            for key, value in otherlgs.items():
+                DBSession.add(common.Value_data(key=key, value=value, object_pk=v.pk))
 
     print '%s of %s source concepts unmapped' % (unmapped, sc)
 
