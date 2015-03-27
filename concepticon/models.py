@@ -14,7 +14,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from clld import interfaces
 from clld.db.meta import Base, CustomModelMixin
-from clld.db.models.common import Source, Contribution, Parameter, Value
+from clld.db.models.common import Source, Contribution, Parameter, Value, HasSourceMixin
 
 
 # -----------------------------------------------------------------------------
@@ -35,6 +35,11 @@ class DefinedConcept(CustomModelMixin, Parameter):
     pos = Column(Unicode)
     representation = Column(Integer)
 
+    @property
+    def omegawiki_url(self):
+        if self.omegawiki:
+            return 'http://www.omegawiki.org/DefinedMeaning:%s' % self.omegawiki
+
 
 @implementer(interfaces.IContribution)
 class Conceptlist(CustomModelMixin, Contribution):
@@ -42,10 +47,4 @@ class Conceptlist(CustomModelMixin, Contribution):
     source_languages = Column(Unicode)
     target_languages = Column(Unicode)
     items = Column(Integer)
-
-
-@implementer(interfaces.ISource)
-class Ref(CustomModelMixin, Source):
-    pk = Column(Integer, ForeignKey('source.pk'), primary_key=True)
-    conceptlist_pk = Column(Integer, ForeignKey('conceptlist.pk'))
-    conceptlist = relationship(Conceptlist, backref=backref('source', uselist=False))
+    year = Column(Integer)

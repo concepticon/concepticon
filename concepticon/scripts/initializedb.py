@@ -14,8 +14,8 @@ import concepticon
 from concepticon import models
 
 
-def split(s):
-    return [ss.strip() for ss in s.split(',') if ss.strip()]
+def split(s, sep=','):
+    return [ss.strip() for ss in s.split(sep) if ss.strip()]
 
 
 def main(args):
@@ -42,6 +42,11 @@ def main(args):
         id='eng',
         name='English')
 
+    files = {}
+    for fname in args.data_file('concepticon-data', 'sources').files():
+        files[fname.namebase] = \
+            "https://github.com/clld/concepticon-data/blob/master/sources/%s" % fname.name
+
     conceptlists = []
     for fname in args.data_file('concepticon-data', 'conceptlists').files():
         if fname.namebase.startswith('.'):
@@ -54,18 +59,54 @@ def main(args):
 
     langs = []
     with_source = set()
-    for rec in Database.from_file(
-            args.data_file('concepticon-data', 'references', 'references.bib'), lowercase=True):
-        source = bibtex2source(rec, cls=models.Ref)
-        if rec.id in data['Conceptlist']:
-            with_source.add(rec.id)
-            langs.extend(split(rec['source_language']))
-            source.conceptlist = data['Conceptlist'][rec.id]
-            data['Conceptlist'][rec.id].description = source.note
-            data['Conceptlist'][rec.id].source_languages = ' '.join(split(rec['source_language']))
-            data['Conceptlist'][rec.id].target_languages = rec.get('target_language')
+    refdb = Database.from_file(
+        args.data_file('concepticon-data', 'references', 'references.bib'),
+        lowercase=True)
+    for rec in refdb:
+        if rec.id not in data['Conceptlist']:
+            source = data.add(common.Source, rec.id, _obj=bibtex2source(rec))
+            if rec.id in files:
+                print 'a file!!', rec.id
+                DBSession.flush()
+                DBSession.add(common.Source_files(
+                    mime_type='application/pdf',
+                    object_pk=source.pk,
+                    jsondata=dict(url=files[rec.id])))
 
-        data.add(models.Ref, rec.id, _obj=source)
+    for rec in refdb:
+        if rec.id in data['Conceptlist']:
+            conceptlist = data['Conceptlist'][rec.id]
+            with_source.add(rec.id)
+
+            for k, v in rec.items():
+                if v.startswith('{') and v.endswith('}'):
+                    v = v[1:-1].strip()
+                if k in ['source_languages', 'target_languages', 'owner', 'timestamp']:
+                    continue
+                if k == 'source_language':
+                    langs.extend(split(v))
+                    conceptlist.source_languages = ' '.join(split(v))
+                elif k == 'entryset':
+                    for id_ in split(v):
+                        common.ContributionReference(
+                            source=data['Source'][id_], contribution=conceptlist)
+                elif k == 'author':
+                    for i, name in enumerate(split(rec['author'], sep=' and ')):
+                        contrib = data['Contributor'].get(name)
+                        if not contrib:
+                            contrib = data.add(common.Contributor, name, id=slug(name), name=name)
+                        DBSession.add(common.ContributionContributor(
+                            ord=i, contribution=conceptlist, contributor=contrib))
+                elif k == 'year':
+                    conceptlist.year = int(v)
+                elif k == 'note':
+                    conceptlist.description = v
+                elif k == 'target_language':
+                    conceptlist.target_languages = v
+                else:
+                    DBSession.flush()
+                    DBSession.add(common.Contribution_data(
+                        object_pk=conceptlist.pk, key=k, value=v))
 
     assert with_source == set(list(data['Conceptlist'].keys()))
 
@@ -76,6 +117,7 @@ def main(args):
             models.DefinedConcept,
             concept.OMEGAWIKI,
             id='%s' % uuid4(),
+            omegawiki=concept.OMEGAWIKI,
             name=concept.GLOSS,
             description=concept.DEFINITION,
             semanticfield=concept.SEMANTICFIELD,
@@ -87,19 +129,19 @@ def main(args):
 
     for fname in conceptlists:
         conceptlist = data['Conceptlist'][fname.namebase]
-        langs = conceptlist.source_languages.split()
+        langs = [l.lower() for l in conceptlist.source_languages.split()]
         numbers = []
         for concept in reader(fname, namedtuples=True):
             sc += 1
             number = concept.NUMBER if hasattr(concept, 'NUMBER') else concept.ID
             if number in numbers:
-                print '---', concept.OMEGAWIKI, fname.namebase, number, 'multiple!'
+                #print '---', concept.OMEGAWIKI, fname.namebase, number, 'multiple!'
                 unmapped += 1
                 continue
 
             numbers.append(number)
             if concept.OMEGAWIKI == 'NAN' or concept.OMEGAWIKI not in data['DefinedConcept']:
-                print '---', concept.OMEGAWIKI, fname.namebase, number
+                #print '---', concept.OMEGAWIKI, fname.namebase, number
                 unmapped += 1
                 continue
 
@@ -118,6 +160,10 @@ def main(args):
                 language=english,
                 contribution=conceptlist,
                 parameter=data['DefinedConcept'][concept.OMEGAWIKI])
+            d = {}
+            for key, value in concept.__dict__.items():
+                if key not in ['NUMBER', 'ID', 'OMEGAWIKI', 'GLOSS'] + [l.upper() for l in langs]:
+                    d[key.lower()] = value
             v = data.add(
                 models.Concept, id_,
                 id=id_,
@@ -125,7 +171,8 @@ def main(args):
                 name=gloss,
                 description='; '.join('%s [%s]' % (otherlgs[l], l) for l in sorted(otherlgs.keys())),
                 number=int(match.group('number')),
-                number_suffix=match.group('suffix'))
+                number_suffix=match.group('suffix'),
+                jsondata=d)
             DBSession.flush()
             for key, value in otherlgs.items():
                 DBSession.add(common.Value_data(key=key, value=value, object_pk=v.pk))

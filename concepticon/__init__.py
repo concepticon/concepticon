@@ -5,6 +5,8 @@ from concepticon import models
 
 
 _ = lambda i: i
+_('Contributor')
+_('Contributors')
 _('Contribution')
 _('Contributions')
 _('Parameter')

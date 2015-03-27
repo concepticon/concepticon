@@ -1,14 +1,17 @@
 from clld.web.datatables.base import Col, LinkCol, IdCol, DetailsRowLinkCol
-from clld.web.datatables.contribution import Contributions
+from clld.web.datatables.contribution import Contributions, ContributorsCol
 from clld.web.datatables.parameter import Parameters
 from clld.web.datatables.value import Values
+from clld.web.util.helpers import linked_references
 
-from concepticon.models import DefinedConcept, Concept
+from concepticon.models import DefinedConcept, Concept, Conceptlist
 
 
-class CompilerCol(Col):
+class RefsCol(Col):
+    __kw__ = {'bSortable': False, 'bSearchable': False}
+
     def format(self, item):
-        return item.source.author
+        return linked_references(self.dt.req, item)
 
 
 class Conceptlists(Contributions):
@@ -16,8 +19,12 @@ class Conceptlists(Contributions):
         return [
             DetailsRowLinkCol(self, 'd', sTitle='Note'),
             LinkCol(self, 'name'),
-            CompilerCol(self, 'compiler'),
-            LinkCol(self, 'source', get_object=lambda cl: cl.source),
+            ContributorsCol(self, 'compiler'),
+            Col(self, 'items', model_col=Conceptlist.items),
+            Col(self, 'year', model_col=Conceptlist.year),
+            Col(self, 'source_languages', model_col=Conceptlist.source_languages),
+            Col(self, 'target_languages', model_col=Conceptlist.target_languages),
+            RefsCol(self, 'sources'),
         ]
 
 

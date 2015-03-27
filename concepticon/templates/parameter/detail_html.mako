@@ -5,6 +5,10 @@
 
 <h2>${_('Parameter')} ${ctx.name}</h2>
 
+% if ctx.omegawiki:
+<p>${h.external_link(ctx.omegawiki_url)}</p>
+% endif
+
 % if ctx.description:
 <p>${ctx.description}</p>
 % endif

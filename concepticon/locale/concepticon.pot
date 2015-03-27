@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: concepticon 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-03-27 09:08+0100\n"
+"POT-Creation-Date: 2015-03-27 13:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,26 +18,34 @@ msgstr ""
 "Generated-By: Babel 1.3\n"
 
 #: concepticon/__init__.py:8
-msgid "Contribution"
+msgid "Contributor"
 msgstr ""
 
 #: concepticon/__init__.py:9
-msgid "Contributions"
+msgid "Contributors"
 msgstr ""
 
 #: concepticon/__init__.py:10
-msgid "Parameter"
+msgid "Contribution"
 msgstr ""
 
 #: concepticon/__init__.py:11
-msgid "Parameters"
+msgid "Contributions"
 msgstr ""
 
 #: concepticon/__init__.py:12
-msgid "Value"
+msgid "Parameter"
 msgstr ""
 
 #: concepticon/__init__.py:13
+msgid "Parameters"
+msgstr ""
+
+#: concepticon/__init__.py:14
+msgid "Value"
+msgstr ""
+
+#: concepticon/__init__.py:15
 msgid "Values"
 msgstr ""
 
