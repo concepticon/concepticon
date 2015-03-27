@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+development.ini
+data
 
 # C extensions
 *.so
@@ -13,7 +15,6 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -40,9 +41,6 @@ htmlcov/
 nosetests.xml
 coverage.xml
 
-# Translations
-*.mo
-*.pot
 
 # Django stuff:
 *.log
@@ -52,3 +50,4 @@ docs/_build/
 
 # PyBuilder
 target/
+.idea
