@@ -3,8 +3,9 @@ from clld.web.datatables.contribution import Contributions, ContributorsCol
 from clld.web.datatables.parameter import Parameters
 from clld.web.datatables.value import Values
 from clld.web.util.helpers import linked_references
+from clld.db.util import get_distinct_values
 
-from concepticon.models import DefinedConcept, Concept, Conceptlist
+from concepticon.models import DefinedMeaning, Concept, Conceptlist
 
 
 class RefsCol(Col):
@@ -28,18 +29,24 @@ class Conceptlists(Contributions):
         ]
 
 
-class DefinedConcepts(Parameters):
+class DefinedMeanings(Parameters):
     def col_defs(self):
         return [
             IdCol(self, 'id', sClass='left'),
             LinkCol(self, 'name'),
             Col(self, 'description', sTitle='Definition'),
-            Col(self, 'semantic_field', model_col=DefinedConcept.semanticfield),
-            Col(self, 'part_of_speech', model_col=DefinedConcept.pos),
+            Col(self,
+                'semantic_field',
+                choices=get_distinct_values(DefinedMeaning.semanticfield),
+                model_col=DefinedMeaning.semanticfield),
+            Col(self,
+                'taxonomy',
+                choices=get_distinct_values(DefinedMeaning.taxonomy),
+                model_col=DefinedMeaning.taxonomy),
             Col(self,
                 'representation',
                 sDescription='number of concept lists this concept appears in',
-                model_col=DefinedConcept.representation),
+                model_col=DefinedMeaning.representation),
         ]
 
 
@@ -54,7 +61,7 @@ class Concepts(Values):
     def col_defs(self):
         res = [
             ConceptIdCol(self, 'id', sClass='left'),
-            LinkCol(self, 'name', sTitle='Gloss'),
+            Col(self, 'name', sTitle='English gloss'),
             Col(self, 'description', sTitle='Source languages')
         ]
         if self.parameter:
@@ -65,6 +72,6 @@ class Concepts(Values):
 
 
 def includeme(config):
-    config.register_datatable('parameters', DefinedConcepts)
+    config.register_datatable('parameters', DefinedMeanings)
     config.register_datatable('values', Concepts)
     config.register_datatable('contributions', Conceptlists)

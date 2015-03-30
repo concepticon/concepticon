@@ -4,17 +4,12 @@ from sqlalchemy import (
     String,
     Unicode,
     Integer,
-    Boolean,
     ForeignKey,
-    UniqueConstraint,
 )
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from clld import interfaces
-from clld.db.meta import Base, CustomModelMixin
-from clld.db.models.common import Source, Contribution, Parameter, Value, HasSourceMixin
+from clld.db.meta import CustomModelMixin
+from clld.db.models.common import Contribution, Parameter, Value
 
 
 # -----------------------------------------------------------------------------
@@ -28,11 +23,11 @@ class Concept(CustomModelMixin, Value):
 
 
 @implementer(interfaces.IParameter)
-class DefinedConcept(CustomModelMixin, Parameter):
+class DefinedMeaning(CustomModelMixin, Parameter):
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
     omegawiki = Column(String)
     semanticfield = Column(Unicode)
-    pos = Column(Unicode)
+    taxonomy = Column(Unicode)
     representation = Column(Integer)
 
     @property

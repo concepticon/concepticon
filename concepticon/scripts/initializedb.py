@@ -20,6 +20,7 @@ def split(s, sep=','):
 
 def main(args):
     data = Data()
+    data_path = lambda *cs: args.data_file('concepticon-data', 'concepticondata', *cs)
 
     dataset = common.Dataset(
         id=concepticon.__name__,
@@ -33,7 +34,7 @@ def main(args):
             'license_icon': 'cc-by.png',
             'license_name': 'Creative Commons Attribution 4.0 International License'})
     DBSession.add(dataset)
-    for i, name in enumerate(['Johann-Mattis List', 'Michael Cysouw']):
+    for i, name in enumerate(['Johann-Mattis List', 'Michael Cysouw', 'Robert Forkel']):
         c = common.Contributor(id=slug(name), name=name)
         dataset.editors.append(common.Editor(contributor=c, ord=i))
 
@@ -43,12 +44,12 @@ def main(args):
         name='English')
 
     files = {}
-    for fname in args.data_file('concepticon-data', 'sources').files():
+    for fname in data_path('sources').files():
         files[fname.namebase] = \
             "https://github.com/clld/concepticon-data/blob/master/sources/%s" % fname.name
 
     conceptlists = []
-    for fname in args.data_file('concepticon-data', 'conceptlists').files():
+    for fname in data_path('conceptlists').files():
         if fname.namebase.startswith('.'):
             continue
         conceptlists.append(fname)
@@ -59,14 +60,11 @@ def main(args):
 
     langs = []
     with_source = set()
-    refdb = Database.from_file(
-        args.data_file('concepticon-data', 'references', 'references.bib'),
-        lowercase=True)
+    refdb = Database.from_file(data_path('references', 'references.bib'), lowercase=True)
     for rec in refdb:
         if rec.id not in data['Conceptlist']:
             source = data.add(common.Source, rec.id, _obj=bibtex2source(rec))
             if rec.id in files:
-                print 'a file!!', rec.id
                 DBSession.flush()
                 DBSession.add(common.Source_files(
                     mime_type='application/pdf',
@@ -110,63 +108,52 @@ def main(args):
 
     assert with_source == set(list(data['Conceptlist'].keys()))
 
-    for concept in reader(
-            args.data_file('concepticon-data', 'concepticon.tsv'), namedtuples=True):
-        #OMEGAWIKI	SEEALSO	GLOSS	SEMANTICFIELD	DEFINITION	POS	WOLD
+    for concept in reader(data_path('concepticon.tsv'), namedtuples=True):
+        #Noun -> Thing
+        #Verb    -> Action/Process
+        #Adjective -> Property
+        #Function Word -> Other
         data.add(
-            models.DefinedConcept,
-            concept.OMEGAWIKI,
-            id='%s' % uuid4(),
+            models.DefinedMeaning,
+            concept.ID,
+            id=concept.ID,
             omegawiki=concept.OMEGAWIKI,
             name=concept.GLOSS,
             description=concept.DEFINITION,
             semanticfield=concept.SEMANTICFIELD,
-            pos=concept.POS)
+            taxonomy=concept.POS)
 
-    sc = 0
     unmapped = 0
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
 
     for fname in conceptlists:
         conceptlist = data['Conceptlist'][fname.namebase]
         langs = [l.lower() for l in conceptlist.source_languages.split()]
-        numbers = []
         for concept in reader(fname, namedtuples=True):
-            sc += 1
-            number = concept.NUMBER if hasattr(concept, 'NUMBER') else concept.ID
-            if number in numbers:
-                #print '---', concept.OMEGAWIKI, fname.namebase, number, 'multiple!'
+            if not concept.ID or not concept.CONCEPTICON_ID or concept.CONCEPTICON_ID == 'NAN':
                 unmapped += 1
                 continue
 
-            numbers.append(number)
-            if concept.OMEGAWIKI == 'NAN' or concept.OMEGAWIKI not in data['DefinedConcept']:
-                #print '---', concept.OMEGAWIKI, fname.namebase, number
-                unmapped += 1
-                continue
-
-            id_ = '%s--%s' % (fname.namebase, number)
             otherlgs = {}
             for lang in langs:
                 if lang != 'english':
                     if getattr(concept, lang.upper(), None):
                         otherlgs[lang] = getattr(concept, lang.upper())
-            match = number_pattern.match(number)
-            gloss = concept.GLOSS if hasattr(concept, 'GLOSS') else concept.ENGLISH
-            vs = data.add(
-                common.ValueSet, id_,
-                id=id_,
+
+            match = number_pattern.match(concept.NUMBER)
+            gloss = concept.GLOSS
+            vs = common.ValueSet(
+                id=concept.ID,
                 description=gloss,
                 language=english,
                 contribution=conceptlist,
-                parameter=data['DefinedConcept'][concept.OMEGAWIKI])
+                parameter=data['DefinedMeaning'][concept.CONCEPTICON_ID])
             d = {}
             for key, value in concept.__dict__.items():
                 if key not in ['NUMBER', 'ID', 'OMEGAWIKI', 'GLOSS'] + [l.upper() for l in langs]:
                     d[key.lower()] = value
-            v = data.add(
-                models.Concept, id_,
-                id=id_,
+            v = models.Concept(
+                id=concept.ID,
                 valueset=vs,
                 name=gloss,
                 description='; '.join('%s [%s]' % (otherlgs[l], l) for l in sorted(otherlgs.keys())),
@@ -177,7 +164,7 @@ def main(args):
             for key, value in otherlgs.items():
                 DBSession.add(common.Value_data(key=key, value=value, object_pk=v.pk))
 
-    print '%s of %s source concepts unmapped' % (unmapped, sc)
+    print '%s concepts unmapped' % unmapped
 
 
 def prime_cache(args):
@@ -185,7 +172,7 @@ def prime_cache(args):
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
     """
-    for concept in DBSession.query(models.DefinedConcept):
+    for concept in DBSession.query(models.DefinedMeaning):
         concept.representation = len(concept.valuesets)
 
     for clist in DBSession.query(models.Conceptlist):
