@@ -19,11 +19,11 @@ msgstr ""
 
 #: concepticon/__init__.py:8
 msgid "Contributor"
-msgstr "Compiler"
+msgstr "Author"
 
 #: concepticon/__init__.py:9
 msgid "Contributors"
-msgstr "Compilers"
+msgstr "Authors"
 
 #: concepticon/__init__.py:10
 msgid "Contribution"
@@ -35,11 +35,11 @@ msgstr "Concept lists"
 
 #: concepticon/__init__.py:12
 msgid "Parameter"
-msgstr "Defined meaning"
+msgstr "Concept set"
 
 #: concepticon/__init__.py:13
 msgid "Parameters"
-msgstr "Defined meanings"
+msgstr "Concept sets"
 
 #: concepticon/__init__.py:14
 msgid "Value"

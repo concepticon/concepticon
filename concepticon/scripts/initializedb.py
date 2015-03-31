@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import sys
 import re
-from uuid import uuid4
 
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
@@ -89,7 +88,7 @@ def main(args):
                         common.ContributionReference(
                             source=data['Source'][id_], contribution=conceptlist)
                 elif k == 'author':
-                    for i, name in enumerate(split(rec['author'], sep=' and ')):
+                    for i, name in enumerate(split(v, sep=' and ')):
                         contrib = data['Contributor'].get(name)
                         if not contrib:
                             contrib = data.add(common.Contributor, name, id=slug(name), name=name)
@@ -109,19 +108,15 @@ def main(args):
     assert with_source == set(list(data['Conceptlist'].keys()))
 
     for concept in reader(data_path('concepticon.tsv'), namedtuples=True):
-        #Noun -> Thing
-        #Verb    -> Action/Process
-        #Adjective -> Property
-        #Function Word -> Other
         data.add(
-            models.DefinedMeaning,
+            models.ConceptSet,
             concept.ID,
             id=concept.ID,
             omegawiki=concept.OMEGAWIKI,
             name=concept.GLOSS,
             description=concept.DEFINITION,
             semanticfield=concept.SEMANTICFIELD,
-            taxonomy=concept.POS)
+            ontological_category=concept.ONTOLOGICAL_CATEGORY)
 
     unmapped = 0
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
@@ -134,35 +129,39 @@ def main(args):
                 unmapped += 1
                 continue
 
-            otherlgs = {}
+            lgs = {}
             for lang in langs:
-                if lang != 'english':
-                    if getattr(concept, lang.upper(), None):
-                        otherlgs[lang] = getattr(concept, lang.upper())
+                v = getattr(concept, lang.upper(), None)
+                if not v and lang == 'english':
+                    v = concept.GLOSS
+                if v:
+                    lgs[lang] = v
 
             match = number_pattern.match(concept.NUMBER)
-            gloss = concept.GLOSS
             vs = common.ValueSet(
                 id=concept.ID,
-                description=gloss,
+                description=concept.GLOSS,
                 language=english,
                 contribution=conceptlist,
-                parameter=data['DefinedMeaning'][concept.CONCEPTICON_ID])
+                parameter=data['ConceptSet'][concept.CONCEPTICON_ID])
             d = {}
             for key, value in concept.__dict__.items():
-                if key not in ['NUMBER', 'ID', 'OMEGAWIKI', 'GLOSS'] + [l.upper() for l in langs]:
+                if not key.startswith('CONCEPTICON_') and \
+                        key not in ['NUMBER', 'ID', 'OMEGAWIKI', 'GLOSS'] \
+                                + [l.upper() for l in langs]:
                     d[key.lower()] = value
             v = models.Concept(
                 id=concept.ID,
                 valueset=vs,
-                name=gloss,
-                description='; '.join('%s [%s]' % (otherlgs[l], l) for l in sorted(otherlgs.keys())),
+                description=concept.GLOSS if 'english' not in lgs else '',
+                name='; '.join('%s [%s]' % (lgs[l], l) for l in sorted(lgs.keys())),
                 number=int(match.group('number')),
                 number_suffix=match.group('suffix'),
                 jsondata=d)
             DBSession.flush()
-            for key, value in otherlgs.items():
-                DBSession.add(common.Value_data(key=key, value=value, object_pk=v.pk))
+            for key, value in lgs.items():
+                DBSession.add(
+                    common.Value_data(key='lang_' + key, value=value, object_pk=v.pk))
 
     print '%s concepts unmapped' % unmapped
 
@@ -172,7 +171,7 @@ def prime_cache(args):
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
     """
-    for concept in DBSession.query(models.DefinedMeaning):
+    for concept in DBSession.query(models.ConceptSet):
         concept.representation = len(concept.valuesets)
 
     for clist in DBSession.query(models.Conceptlist):

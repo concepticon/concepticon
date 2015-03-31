@@ -10,4 +10,14 @@ class Tests(TestWithApp):
     __setup_db__ = False
 
     def test_home(self):
-        res = self.app.get('/', status=200)
+        self.app.get_html('/')
+
+    def test_misc(self):
+        self.app.get_html('/parameters/1')
+        self.app.get_html('/contributions/Shiro-1973-200')
+        self.app.get_html('/contributions/Matisoff-1978-200')
+        self.app.get_dt('/parameters')
+        self.app.get_dt('/contributions')
+        self.app.get_dt('/values')
+        self.app.get_dt('/values?parameter=2')
+        self.app.get_dt('/values?contribution=Brinton-1891-21')

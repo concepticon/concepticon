@@ -4,7 +4,7 @@
 
 <%def name="sidebar()">
     <%util:well>
-        <h4>Compilers</h4>
+        <h4>Authors</h4>
             <ul class="unstyled">
             % for c in ctx.primary_contributors:
             <li>

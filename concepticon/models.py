@@ -23,11 +23,11 @@ class Concept(CustomModelMixin, Value):
 
 
 @implementer(interfaces.IParameter)
-class DefinedMeaning(CustomModelMixin, Parameter):
+class ConceptSet(CustomModelMixin, Parameter):
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
     omegawiki = Column(String)
     semanticfield = Column(Unicode)
-    taxonomy = Column(Unicode)
+    ontological_category = Column(Unicode)
     representation = Column(Integer)
 
     @property
