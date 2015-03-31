@@ -14,9 +14,9 @@
         <dt>English gloss:</dt>
         <dd>${ctx.name} [${h.link(request, ctx.valueset.language)}]</dd>
     % endif
-    <dt>Defined concept:</dt>
+    <dt>${_('Parameter')}:</dt>
     <dd>${h.link(request, ctx.valueset.parameter)}</dd>
-    <dt>Conceptlist:</dt>
+    <dt>${_('Contribution')}:</dt>
     <dd>${h.link(request, ctx.valueset.contribution)}</dd>
     % for k, v in ctx.jsondata.items():
     <dt>${k.capitalize()}:</dt>
