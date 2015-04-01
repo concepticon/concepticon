@@ -16,7 +16,7 @@ from clld.db.util import get_distinct_values, icontains
 from concepticon.models import ConceptSet, Concept, Conceptlist
 
 
-class Authors(Contributors):
+class Compilers(Contributors):
     def base_query(self, query):
         return query.join(ContributionContributor)
 
@@ -58,7 +58,7 @@ class Conceptlists(Contributions):
         return [
             DetailsRowLinkCol(self, 'd', sTitle='Note'),
             LinkCol(self, 'name'),
-            ContributorsCol(self, 'author'),
+            ContributorsCol(self, 'compiler'),
             Col(self, 'items', model_col=Conceptlist.items),
             Col(self, 'year', model_col=Conceptlist.year),
             SourceLanguagesCol(self, 'source_languages'),
@@ -177,4 +177,4 @@ def includeme(config):
     config.register_datatable('parameters', ConceptSets)
     config.register_datatable('values', Concepts)
     config.register_datatable('contributions', Conceptlists)
-    config.register_datatable('contributors', Authors)
+    config.register_datatable('contributors', Compilers)
