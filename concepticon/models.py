@@ -24,7 +24,7 @@ class Concept(CustomModelMixin, Value):
 
     def __rdf__(self, request):
         yield 'rdf:type', url_for_qname('skos:Concept')
-        yield 'skos:topConceptOf', request.resource_url(self.contribution)
+        yield 'skos:topConceptOf', request.resource_url(self.valueset.contribution)
 
 
 @implementer(interfaces.IParameter)

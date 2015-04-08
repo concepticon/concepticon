@@ -62,7 +62,11 @@ add a new one. The combined list of all
 <a href="${request.route_url('parameters')}">concept sets</a> is the concepticon.</p>
 <p>We also add a
 rough <em>gloss</em> to each concept set, but this is not supposed to be taken as the
-definition, just as a convenience abbreviation.</p>
+definition, just as a convenience abbreviation.
+An attempt to give a more precise definition of each concept set is made, currently by
+    taking Definitions from (and links to)
+   ${h.external_link('http://www.omegawiki.org/', label='OmegaWiki')}.
+</p>
 <p>For convenience, it also includes <em>semantic fields</em> from the World Loanword Database
     (extended by us for new meanings that are not
 included there) and <em>ontological categories</em>. The ontological categories
