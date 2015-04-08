@@ -9,7 +9,7 @@ import re
 
 from markdown import markdown
 
-from clld.web.util.helpers import link
+from clld.web.util.helpers import get_referents
 from clld.db.models.common import Contribution, Source
 
 
@@ -33,3 +33,7 @@ def dataset_detail_html(request=None, context=None, **kw):
     return {
         'Kraft1981': Source.get('kraft1981'),
     }
+
+
+def source_detail_html(context=None, request=None, **kw):
+    return dict(referents=get_referents(context, exclude=['valueset', 'language']))

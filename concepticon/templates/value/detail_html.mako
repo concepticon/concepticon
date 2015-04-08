@@ -12,7 +12,7 @@
     % endfor
     % if ctx.description:
         <dt>English gloss:</dt>
-        <dd>${ctx.name} [${h.link(request, ctx.valueset.language)}]</dd>
+        <dd>${ctx.description}</dd>
     % endif
     <dt>${_('Parameter')}:</dt>
     <dd>${h.link(request, ctx.valueset.parameter)}</dd>

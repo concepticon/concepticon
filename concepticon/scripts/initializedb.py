@@ -47,65 +47,15 @@ def main(args):
         files[fname.namebase] = \
             "https://github.com/clld/concepticon-data/blob/master/sources/%s" % fname.name
 
-    conceptlists = []
-    for fname in data_path('conceptlists').files():
-        if fname.namebase.startswith('.'):
-            continue
-        conceptlists.append(fname)
-        data.add(
-            models.Conceptlist, fname.namebase,
-            id=fname.namebase,
-            name=' '.join(fname.namebase.split('-')))
-
-    langs = []
-    with_source = set()
-    refdb = Database.from_file(data_path('references', 'references.bib'), lowercase=True)
-    for rec in refdb:
-        if rec.id not in data['Conceptlist']:
-            source = data.add(common.Source, rec.id, _obj=bibtex2source(rec))
-            if rec.id in files:
-                DBSession.flush()
-                DBSession.add(common.Source_files(
-                    mime_type='application/pdf',
-                    object_pk=source.pk,
-                    jsondata=dict(url=files[rec.id])))
-
-    for rec in refdb:
-        if rec.id in data['Conceptlist']:
-            conceptlist = data['Conceptlist'][rec.id]
-            with_source.add(rec.id)
-
-            for k, v in rec.items():
-                if v.startswith('{') and v.endswith('}'):
-                    v = v[1:-1].strip()
-                if k in ['source_languages', 'target_languages', 'owner', 'timestamp']:
-                    continue
-                if k == 'source_language':
-                    langs.extend(split(v))
-                    conceptlist.source_languages = ' '.join(split(v))
-                elif k == 'entryset':
-                    for id_ in split(v):
-                        common.ContributionReference(
-                            source=data['Source'][id_], contribution=conceptlist)
-                elif k == 'author':
-                    for i, name in enumerate(split(v, sep=' and ')):
-                        contrib = data['Contributor'].get(name)
-                        if not contrib:
-                            contrib = data.add(common.Contributor, name, id=slug(name), name=name)
-                        DBSession.add(common.ContributionContributor(
-                            ord=i, contribution=conceptlist, contributor=contrib))
-                elif k == 'year':
-                    conceptlist.year = int(v)
-                elif k == 'note':
-                    conceptlist.description = v
-                elif k == 'target_language':
-                    conceptlist.target_languages = v
-                else:
-                    DBSession.flush()
-                    DBSession.add(common.Contribution_data(
-                        object_pk=conceptlist.pk, key=k, value=v))
-
-    assert with_source == set(list(data['Conceptlist'].keys()))
+    for rec in Database.from_file(
+            data_path('references', 'references.bib'), lowercase=True):
+        source = data.add(common.Source, rec.id, _obj=bibtex2source(rec))
+        if rec.id in files:
+            DBSession.flush()
+            DBSession.add(common.Source_files(
+                mime_type='application/pdf',
+                object_pk=source.pk,
+                jsondata=dict(url=files[rec.id])))
 
     for concept in reader(data_path('concepticon.tsv'), namedtuples=True):
         data.add(
@@ -121,39 +71,65 @@ def main(args):
     unmapped = 0
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
 
-    for fname in conceptlists:
-        conceptlist = data['Conceptlist'][fname.namebase]
-        langs = [l.lower() for l in conceptlist.source_languages.split()]
-        for concept in reader(fname, namedtuples=True):
+    for cl in reader(data_path('conceptlists.tsv'), dicts=True):
+        concepts = data_path('conceptlists', '%(ID)s.tsv' % cl)
+        if not concepts.exists():
+            continue
+        langs = [l.lower() for l in split(cl['SOURCE_LANGUAGE'])]
+        conceptlist = data.add(
+            models.Conceptlist,
+            cl['ID'],
+            id=cl['ID'],
+            name=' '.join(cl['ID'].split('-')),
+            description=cl['NOTE'],
+            target_languages=cl['TARGET_LANGUAGE'],
+            source_languages=' '.join(langs),
+            year=int(cl['YEAR']) if cl['YEAR'] else None,
+        )
+        for id_ in split(cl['REFS']):
+            common.ContributionReference(
+                source=data['Source'][id_], contribution=conceptlist)
+        for i, name in enumerate(split(cl['AUTHOR'], sep=' and ')):
+                contrib = data['Contributor'].get(name)
+                if not contrib:
+                    contrib = data.add(
+                        common.Contributor, name, id=slug(name), name=name)
+                DBSession.add(common.ContributionContributor(
+                    ord=i, contribution=conceptlist, contributor=contrib))
+        for k in 'ID NOTE TARGET_LANGUAGE SOURCE_LANGUAGE YEAR REFS AUTHOR'.split():
+            del cl[k]
+        DBSession.flush()
+        for k, v in cl.items():
+            DBSession.add(common.Contribution_data(
+                object_pk=conceptlist.pk, key=k, value=v))
+
+        for concept in reader(concepts, namedtuples=True):
             if not concept.ID or not concept.CONCEPTICON_ID or concept.CONCEPTICON_ID == 'NAN':
                 unmapped += 1
                 continue
 
             lgs = {}
             for lang in langs:
-                v = getattr(concept, lang.upper(), None)
-                if not v and lang == 'english':
-                    v = concept.GLOSS
+                v = getattr(concept, lang.upper())
                 if v:
                     lgs[lang] = v
 
             match = number_pattern.match(concept.NUMBER)
             vs = common.ValueSet(
                 id=concept.ID,
-                description=concept.GLOSS,
+                description=getattr(concept, 'GLOSS', getattr(concept, 'ENGLISH', None)),
                 language=english,
                 contribution=conceptlist,
                 parameter=data['ConceptSet'][concept.CONCEPTICON_ID])
             d = {}
             for key, value in concept.__dict__.items():
                 if not key.startswith('CONCEPTICON_') and \
-                        key not in ['NUMBER', 'ID', 'OMEGAWIKI', 'GLOSS'] \
-                                + [l.upper() for l in langs]:
+                        key not in ['NUMBER', 'ID', 'GLOSS'] + [l.upper() for l in langs]:
                     d[key.lower()] = value
             v = models.Concept(
                 id=concept.ID,
                 valueset=vs,
-                description=concept.GLOSS if 'english' not in lgs else '',
+                description=getattr(concept, 'GLOSS', None),  # our own gloss, if available
                 name='; '.join('%s [%s]' % (lgs[l], l) for l in sorted(lgs.keys())),
                 number=int(match.group('number')),
                 number_suffix=match.group('suffix'),
