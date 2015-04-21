@@ -6,9 +6,10 @@ from sqlalchemy import (
     Integer,
     ForeignKey,
 )
+from sqlalchemy.orm import relationship
 
 from clld import interfaces
-from clld.db.meta import CustomModelMixin
+from clld.db.meta import CustomModelMixin, Base
 from clld.db.models.common import Contribution, Parameter, Value
 from clld.lib.rdf import url_for_qname
 
@@ -44,6 +45,29 @@ class ConceptSet(CustomModelMixin, Parameter):
         yield 'rdf:type', url_for_qname('skos:Collection')
         for vs in self.valuesets:
             yield 'skos:member', request.resource_url(vs.values[0])
+        for rel in self.rel_to:
+            if rel.description == 'broader':
+                yield 'skos:narrower', request.resource_url(rel.target)
+            elif rel.description == 'narrower':
+                yield 'skos:broader', request.resource_url(rel.target)
+            else:
+                yield 'skos:related', request.resource_url(rel.target)
+        for rel in self.rel_from:
+            if rel.description == 'broader':
+                yield 'skos:broader', request.resource_url(rel.source)
+            elif rel.description == 'narrower':
+                yield 'skos:narrower', request.resource_url(rel.source)
+            else:
+                yield 'skos:related', request.resource_url(rel.source)
+
+
+class Relation(Base):
+    source_pk = Column(Integer, ForeignKey('parameter.pk'))
+    target_pk = Column(Integer, ForeignKey('parameter.pk'))
+    description = Column(Unicode)
+
+    source = relationship(ConceptSet, foreign_keys=[source_pk], backref='rel_to')
+    target = relationship(ConceptSet, foreign_keys=[target_pk], backref='rel_from')
 
 
 @implementer(interfaces.IContribution)
