@@ -47,16 +47,16 @@ class ConceptSet(CustomModelMixin, Parameter):
             yield 'skos:member', request.resource_url(vs.values[0])
         for rel in self.rel_to:
             if rel.description == 'broader':
-                yield 'skos:narrower', request.resource_url(rel.target)
-            elif rel.description == 'narrower':
                 yield 'skos:broader', request.resource_url(rel.target)
+            elif rel.description == 'narrower':
+                yield 'skos:narrower', request.resource_url(rel.target)
             else:
                 yield 'skos:related', request.resource_url(rel.target)
         for rel in self.rel_from:
             if rel.description == 'broader':
-                yield 'skos:broader', request.resource_url(rel.source)
-            elif rel.description == 'narrower':
                 yield 'skos:narrower', request.resource_url(rel.source)
+            elif rel.description == 'narrower':
+                yield 'skos:broader', request.resource_url(rel.source)
             else:
                 yield 'skos:related', request.resource_url(rel.source)
 

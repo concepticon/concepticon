@@ -23,13 +23,15 @@
             </li>
             % endfor
         </ul>
+        <h4>Target languages</h4>
+            <p>${ctx.target_languages}</p>
         <h4>Note</h4>
         <p>
             ${u.link_conceptlists(request, ctx.description)|n}
         </p>
         % if ctx.data:
             <dl>
-                % for d in ctx.data:
+                % for d in [_d for _d in ctx.data if _d.value]:
                 <dt>${d.key.capitalize()}</dt>
                 <dd>
                     % if d.key == 'url':

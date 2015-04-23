@@ -69,11 +69,10 @@ def main(args):
             ontological_category=concept.ONTOLOGICAL_CATEGORY)
 
     for rel in reader(data_path('conceptrelations.tsv'), namedtuples=True):
-        desc_map = {'narrower': 'narrower than', 'broader': 'broader than'}
         DBSession.add(models.Relation(
             source=data['ConceptSet'][rel.SOURCE],
             target=data['ConceptSet'][rel.TARGET],
-            description=desc_map.get(rel.RELATION, rel.RELATION)))
+            description=rel.RELATION))
 
     unmapped = 0
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
