@@ -22,9 +22,7 @@ def link_conceptlists(req, s):
 
     def repl(m):
         ref = Contribution.get(m.group('id'), default=None)
-        if not ref:
-            return s
-        return req.resource_url(ref)
+        return req.resource_url(ref) if ref else m.group('id')
 
     return markdown(REF_PATTERN.sub(repl, s))
 
