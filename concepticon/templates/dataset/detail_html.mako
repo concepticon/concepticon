@@ -4,6 +4,11 @@
 <%def name="sidebar()">
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
+        <p>
+        <a href="http://dx.doi.org/10.5281/zenodo.17199">
+            <img src="https://zenodo.org/badge/5142/clld/concepticon-data.svg">
+        </a>
+        </p>
         ${h.cite_button(request, ctx)}
     </%util:well>
     <%util:well title="Version">
@@ -14,8 +19,6 @@
         ${h.external_link('https://github.com/clld/concepticon-data', label='clld/concepticon-data')} -
         currently the
         ${h.external_link('https://github.com/clld/concepticon-data/releases', label='"public beta" v0.1')}
-        <br />
-        <a href="http://dx.doi.org/10.5281/zenodo.17199"><img src="https://zenodo.org/badge/5142/clld/concepticon-data.svg"><a>
     </%util:well>
 </%def>
 
