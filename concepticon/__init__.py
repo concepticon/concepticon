@@ -1,4 +1,4 @@
-from clld.web.app import get_configurator
+from pyramid.config import Configurator
 
 # we must make sure custom models are known at database initialization!
 from concepticon import models
@@ -18,9 +18,6 @@ _('Values')
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    config = get_configurator('concepticon', settings=settings)
+    config = Configurator(settings=settings)
     config.include('clldmpg')
-    config.include('concepticon.datatables')
-    config.include('concepticon.adapters')
-    config.include('concepticon.maps')
     return config.make_wsgi_app()

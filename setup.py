@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 requires = [
-    'clld>=0.20',
+    'clld>=1.2.1',
     'clldmpg>=0.5',
     'markdown',
     'psycopg2',
