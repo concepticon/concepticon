@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased, joinedload, joinedload_all
 

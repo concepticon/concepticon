@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from zope.interface import implementer
 from sqlalchemy import (
     Column,
