@@ -30,3 +30,5 @@ class Tests(TestWithApp):
         self.app.get_xml('/values/Matisoff-1978-200-65.rdf')
         self.app.get_html('/sources/haspelmath2009a')
         self.app.get_dt('/contributors')
+        self.app.get('/search_concept', status=404)
+        self.app.get('/search_concept?url=http://wold.clld.org/meaning/12-42', status=302)
