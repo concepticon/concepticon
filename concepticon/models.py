@@ -43,6 +43,9 @@ class ConceptSet(CustomModelMixin, Parameter):
             return 'http://www.omegawiki.org/DefinedMeaning:%s' % self.omegawiki
 
     def __rdf__(self, request):
+        if self.omegawiki:
+            yield 'owl:sameAs', self.omegawiki_url
+        yield 'dcterms:type', self.ontological_category
         yield 'rdf:type', url_for_qname('skos:Collection')
         for vs in self.valuesets:
             yield 'skos:member', request.resource_url(vs.values[0])
