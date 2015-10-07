@@ -24,10 +24,11 @@ def main(args):
     dataset = common.Dataset(
         id=concepticon.__name__,
         name="Concepticon",
-        publisher_name="Max Planck Institute for Evolutionary Anthropology",
-        publisher_place="Leipzig",
-        publisher_url="http://www.eva.mpg.de",
+        publisher_name="Max Planck Institute for the Science of Human History",
+        publisher_place="Jena",
+        publisher_url="http://www.shh.mpg.de",
         license="http://creativecommons.org/licenses/by/4.0/",
+        contact='concepticon@shh.mpg.de',
         domain='concepticon.clld.org',
         jsondata={
             'license_icon': 'cc-by.png',
