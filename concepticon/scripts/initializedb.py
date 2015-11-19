@@ -1,6 +1,8 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals, division
 import sys
 import re
+from itertools import combinations
+from collections import defaultdict
 
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
@@ -15,6 +17,15 @@ from concepticon import models
 
 def split(s, sep=','):
     return [ss.strip() for ss in s.split(sep) if ss.strip()]
+
+
+def strip_braces(s):
+    s = s.strip()
+    if s.startswith('{'):
+        s = s[1:]
+    if s.endswith('}'):
+        s = s[:-1]
+    return s.strip()
 
 
 def main(args):
@@ -97,12 +108,13 @@ def main(args):
             common.ContributionReference(
                 source=data['Source'][id_], contribution=conceptlist)
         for i, name in enumerate(split(cl['AUTHOR'], sep=' and ')):
-                contrib = data['Contributor'].get(name)
-                if not contrib:
-                    contrib = data.add(
-                        common.Contributor, name, id=slug(name), name=name)
-                DBSession.add(common.ContributionContributor(
-                    ord=i, contribution=conceptlist, contributor=contrib))
+            name = strip_braces(name)
+            contrib = data['Contributor'].get(name)
+            if not contrib:
+                contrib = data.add(
+                    common.Contributor, name, id=slug(name), name=name)
+            DBSession.add(common.ContributionContributor(
+                ord=i, contribution=conceptlist, contributor=contrib))
         for k in 'ID NOTE TARGET_LANGUAGE SOURCE_LANGUAGE YEAR REFS AUTHOR'.split():
             del cl[k]
         DBSession.flush()
@@ -110,6 +122,7 @@ def main(args):
             DBSession.add(common.Contribution_data(
                 object_pk=conceptlist.pk, key=k, value=v))
 
+        print(concepts)
         for concept in reader(concepts, namedtuples=True):
             if not concept.ID or not concept.CONCEPTICON_ID or concept.CONCEPTICON_ID == 'NAN':
                 print conceptlist.id, getattr(concept, 'ENGLISH', getattr(concept, 'GLOSS', None))
@@ -123,6 +136,9 @@ def main(args):
                     lgs[lang] = v
 
             match = number_pattern.match(concept.NUMBER)
+            if not match:
+                print(concept.ID)
+                raise ValueError
             vs = common.ValueSet(
                 id=concept.ID,
                 description=getattr(concept, 'GLOSS', getattr(concept, 'ENGLISH', None)),
@@ -150,6 +166,16 @@ def main(args):
     print '%s concepts unmapped' % unmapped
 
 
+def similarity(cl1, cl2):
+    cs1 = set(c.parameter_pk for c in cl1.valuesets)
+    cs2 = set(c.parameter_pk for c in cl2.valuesets)
+    return len(cs1.intersection(cs2)) / len(cs1.union(cs2))
+
+
+def uniqueness(cl):
+    return sum([1 / len(c.parameter.valuesets) for c in cl.valuesets]) / len(cl.valuesets)
+
+
 def prime_cache(args):
     """If data needs to be denormalized for lookup, do that here.
     This procedure should be separate from the db initialization, because
@@ -158,8 +184,26 @@ def prime_cache(args):
     for concept in DBSession.query(models.ConceptSet):
         concept.representation = len(concept.valuesets)
 
+    ul = []
     for clist in DBSession.query(models.Conceptlist):
         clist.items = len(clist.valuesets)
+        ul.append((clist.name, uniqueness(clist)))
+
+    #for i, (n, u) in enumerate(sorted(ul, key=lambda t: t[1], reverse=True)):
+    #    if i > 10:
+    #        break
+    #    print n, u
+
+    similarities = {}
+    for cl1, cl2 in combinations(DBSession.query(models.Conceptlist), 2):
+        s = similarity(cl1, cl2)
+        similarities[(cl1.name, cl2.name)] = s
+
+    for i, ((l1, l2), s) in enumerate(sorted(similarities.items(), key=lambda i: i[1], reverse=True)):
+        if i < 20:
+            print l1, l2, s
+        if s == 0:
+            pass
 
 
 if __name__ == '__main__':

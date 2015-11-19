@@ -18,7 +18,7 @@
         of data curated at
         ${h.external_link('https://github.com/clld/concepticon-data', label='clld/concepticon-data')} -
         currently the
-        ${h.external_link('https://github.com/clld/concepticon-data/releases', label='"public beta" v0.1')}
+        ${h.external_link('https://github.com/clld/concepticon-data/releases/tag/v0.2', label='"public beta" v0.2')}
     </%util:well>
 </%def>
 
