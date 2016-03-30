@@ -29,6 +29,21 @@
         <p>
             ${u.link_conceptlists(request, ctx.description)|n}
         </p>
+            <h4>Most similar concept lists</h4>
+            <table class="table table-condensed table-nonfluid">
+                <thead>
+                    <tr><th>Concept list</th><th>Similarity score</th></tr>
+                </thead>
+                <tbody>
+                <% rsc = [r for r in h.RESOURCES if r.name == 'contribution'][0] %>
+                % for clid, score in ctx.jsondata['most_similar']:
+                <tr>
+                    <td><a href="${request.resource_url(clid, rsc=rsc)}">${clid}</a></td>
+                    <td>${'{0:.2}'.format(score)}</td>
+                </tr>
+                % endfor
+                </tbody>
+            </table>
         % if ctx.data:
             <dl>
                 % for d in [_d for _d in ctx.data if _d.value]:

@@ -7,6 +7,7 @@ from sqlalchemy import (
     String,
     Unicode,
     Integer,
+    Float,
     ForeignKey,
 )
 from sqlalchemy.orm import relationship, backref
@@ -119,6 +120,7 @@ class Conceptlist(CustomModelMixin, Contribution):
     source_languages = Column(Unicode)
     target_languages = Column(Unicode)
     items = Column(Integer)
+    uniqueness = Column(Float)
     year = Column(Integer)
 
     def __rdf__(self, request):

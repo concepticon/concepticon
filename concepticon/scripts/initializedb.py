@@ -40,7 +40,7 @@ def main(args):
 
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="Concepticon 0.2",
+        name="Concepticon 1.0",
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
         publisher_url="http://www.shh.mpg.de",
@@ -213,26 +213,16 @@ def prime_cache(args):
     for concept in DBSession.query(models.ConceptSet):
         concept.representation = len(concept.valuesets)
 
-    ul = []
     for clist in DBSession.query(models.Conceptlist):
         clist.items = len(clist.valuesets)
-        ul.append((clist.name, uniqueness(clist)))
+        clist.uniqueness = uniqueness(clist)
 
-    #for i, (n, u) in enumerate(sorted(ul, key=lambda t: t[1], reverse=True)):
-    #    if i > 10:
-    #        break
-    #    print n, u
+        similar = Counter()
+        for other in DBSession.query(models.Conceptlist):
+            if other != clist:
+                similar[other.id] = similarity(clist, other)
 
-    similarities = {}
-    for cl1, cl2 in combinations(DBSession.query(models.Conceptlist), 2):
-        s = similarity(cl1, cl2)
-        similarities[(cl1.name, cl2.name)] = s
-
-    #for i, ((l1, l2), s) in enumerate(sorted(similarities.items(), key=lambda i: i[1], reverse=True)):
-    #    if i < 20:
-    #        print l1, l2, s
-    #    if s == 0:
-    #        pass
+        clist.update_jsondata(most_similar=similar.most_common(n=5))
 
 
 if __name__ == '__main__':
