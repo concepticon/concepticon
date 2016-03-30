@@ -1,9 +1,10 @@
 from clld.web.assets import environment
-from path import path
+from clldutils.path import Path
 
 import concepticon
 
 
 environment.append_path(
-    path(concepticon.__file__).dirname().joinpath('static'), url='/concepticon:static/')
+    Path(concepticon.__file__).parent.joinpath('static').as_posix(),
+    url='/concepticon:static/')
 environment.load_path = list(reversed(environment.load_path))

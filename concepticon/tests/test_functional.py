@@ -1,12 +1,11 @@
-from path import path
-
+from clldutils.path import Path
 from clld.tests.util import TestWithApp
 
 import concepticon
 
 
 class Tests(TestWithApp):
-    __cfg__ = path(concepticon.__file__).dirname().joinpath('..', 'development.ini').abspath()
+    __cfg__ = Path(concepticon.__file__).parent.joinpath('..', 'development.ini').resolve()
     __setup_db__ = False
 
     def test_home(self):
@@ -15,8 +14,8 @@ class Tests(TestWithApp):
     def test_misc(self):
         self.app.get_html('/parameters/1')
         self.app.get_xml('/parameters/1.rdf')
-        self.app.get_html('/contributions/Shiro-1973-200')
-        self.app.get_xml('/contributions/Shiro-1973-200.rdf')
+        self.app.get_html('/contributions/Hattori-1973-200')
+        self.app.get_xml('/contributions/Hattori-1973-200.rdf')
         self.app.get_html('/contributions/Matisoff-1978-200')
         self.app.get_dt('/parameters')
         self.app.get_xml('/parameters/127.rdf')

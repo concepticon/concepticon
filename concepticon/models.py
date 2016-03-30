@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+from collections import OrderedDict
+
 from zope.interface import implementer
 from sqlalchemy import (
     Column,
@@ -7,12 +9,14 @@ from sqlalchemy import (
     Integer,
     ForeignKey,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
+from uritemplate import expand, variables
 
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
-from clld.db.models.common import Contribution, Parameter, Value
-from clld.lib.rdf import url_for_qname
+from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin
+from clld.lib.rdf import url_for_qname, NAMESPACES
+from clldutils.misc import cached_property
 
 
 # -----------------------------------------------------------------------------
@@ -32,19 +36,11 @@ class Concept(CustomModelMixin, Value):
 @implementer(interfaces.IParameter)
 class ConceptSet(CustomModelMixin, Parameter):
     pk = Column(Integer, ForeignKey('parameter.pk'), primary_key=True)
-    omegawiki = Column(String)
     semanticfield = Column(Unicode)
     ontological_category = Column(Unicode)
     representation = Column(Integer)
 
-    @property
-    def omegawiki_url(self):
-        if self.omegawiki:
-            return 'http://www.omegawiki.org/DefinedMeaning:%s' % self.omegawiki
-
     def __rdf__(self, request):
-        if self.omegawiki:
-            yield 'owl:sameAs', self.omegawiki_url
         yield 'dcterms:type', self.ontological_category
         yield 'rdf:type', url_for_qname('skos:Collection')
         for vs in self.valuesets:
@@ -63,6 +59,49 @@ class ConceptSet(CustomModelMixin, Parameter):
                 yield 'skos:broader', request.resource_url(rel.source)
             else:
                 yield 'skos:related', request.resource_url(rel.source)
+        for meta in self.meta:
+            if meta.propertyUrl and meta.valueUrl:
+                yield meta.propertyUrl, meta.valueUrl
+
+
+class MetaProvider(Base, IdNameDescriptionMixin):
+    url = Column(String)
+
+    @property
+    def schema(self):
+        d = OrderedDict()
+        for c in self.jsondata['tableSchema']['columns']:
+            d[c['name']] = c
+        return d
+
+
+class ConceptSetMeta(Base, IdNameDescriptionMixin):
+    metaprovider_pk = Column(Integer, ForeignKey('metaprovider.pk'))
+    conceptset_pk = Column(Integer, ForeignKey('conceptset.pk'))
+
+    metaprovider = relationship(MetaProvider, backref='meta')
+    conceptset = relationship(
+        ConceptSet,
+        backref=backref('meta', order_by=[metaprovider_pk]))
+
+    key = Column(Unicode)
+    value = Column(Unicode)
+
+    @cached_property()
+    def schema(self):
+        return self.metaprovider.schema[self.key]
+
+    @cached_property()
+    def propertyUrl(self):
+        url = self.schema.get('propertyUrl')
+        if url and ':' in url and url.split(':', 1)[0] in NAMESPACES:
+            return url
+
+    @cached_property()
+    def valueUrl(self):
+        url = self.schema.get('valueUrl')
+        if url and variables(url) == {self.key}:
+            return expand(url, {self.key: self.value})
 
 
 class Relation(Base):

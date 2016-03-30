@@ -5,12 +5,8 @@
 
 <h2>${_('Parameter')} ${ctx.name}</h2>
 
-% if ctx.omegawiki:
-<p>${h.external_link(ctx.omegawiki_url)}</p>
-% endif
-
 % if ctx.description:
-<p>${ctx.description}</p>
+<p class="alert alert-info">${ctx.description}</p>
 % endif
 
 % if ctx.rel_to or ctx.rel_from:
@@ -31,3 +27,10 @@
 
 ${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
 
+<%def name="sidebar()">
+    % if ctx.meta:
+        <%util:well title="Metadata">
+            ${u.render_metadata(ctx)}
+        </%util:well>
+    % endif
+</%def>

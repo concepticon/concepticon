@@ -2,17 +2,23 @@ from __future__ import unicode_literals, division
 import sys
 import re
 from itertools import combinations
-from collections import defaultdict
+from collections import Counter
 
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.bibtex import Database
-from clld.lib.dsv import reader
-from clld.util import slug
+from clldutils.dsv import reader as _reader
+from clldutils.jsonlib import load
+from clldutils.misc import slug
 
 import concepticon
 from concepticon import models
+
+
+def reader(*args, **kw):
+    kw.setdefault('delimiter', '\t')
+    return _reader(*args, **kw)
 
 
 def split(s, sep=','):
@@ -55,8 +61,8 @@ def main(args):
         name='English')
 
     files = {}
-    for fname in data_path('sources').files():
-        files[fname.namebase] = \
+    for fname in data_path('sources').iterdir():
+        files[fname.stem] = \
             "https://github.com/clld/concepticon-data/blob/master/concepticondata/sources/%s" % fname.name
 
     for rec in Database.from_file(
@@ -74,7 +80,6 @@ def main(args):
             models.ConceptSet,
             concept.ID,
             id=concept.ID,
-            omegawiki=concept.OMEGAWIKI,
             name=concept.GLOSS,
             description=concept.DEFINITION,
             semanticfield=concept.SEMANTICFIELD,
@@ -86,7 +91,7 @@ def main(args):
             target=data['ConceptSet'][rel.TARGET],
             description=rel.RELATION))
 
-    unmapped = 0
+    unmapped = Counter()
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
 
     for cl in reader(data_path('conceptlists.tsv'), dicts=True):
@@ -122,11 +127,10 @@ def main(args):
             DBSession.add(common.Contribution_data(
                 object_pk=conceptlist.pk, key=k, value=v))
 
-        print(concepts)
         for concept in reader(concepts, namedtuples=True):
             if not concept.ID or not concept.CONCEPTICON_ID or concept.CONCEPTICON_ID == 'NAN':
-                print conceptlist.id, getattr(concept, 'ENGLISH', getattr(concept, 'GLOSS', None))
-                unmapped += 1
+                #print conceptlist.id, getattr(concept, 'ENGLISH', getattr(concept, 'GLOSS', None))
+                unmapped.update([conceptlist.id])
                 continue
 
             lgs = {}
@@ -163,7 +167,32 @@ def main(args):
                 DBSession.add(
                     common.Value_data(key='lang_' + key, value=value, object_pk=v.pk))
 
-    print '%s concepts unmapped' % unmapped
+    print('Unmapped concepts:')
+    for clid, no in unmapped.most_common():
+        print(clid, no)
+
+    for fname in data_path('concept_set_meta').iterdir():
+        if fname.suffix == '.tsv':
+            md = load(fname.parent.joinpath(fname.name + '-metadata.json'))
+            provider = models.MetaProvider(
+                id=fname.stem,
+                name=md['dc:title'],
+                description=md['dc:description'],
+                url=md['dc:source'],
+                jsondata=md)
+            for meta in reader(fname, dicts=True):
+                try:
+                    for k, v in meta.items():
+                        if v and k != 'CONCEPTICON_ID':
+                            models.ConceptSetMeta(
+                                metaprovider=provider,
+                                conceptset=data['ConceptSet'][meta['CONCEPTICON_ID']],
+                                key=k,
+                                value=v)
+                except:
+                    print(fname)
+                    print(meta)
+                    raise
 
 
 def similarity(cl1, cl2):
@@ -199,11 +228,11 @@ def prime_cache(args):
         s = similarity(cl1, cl2)
         similarities[(cl1.name, cl2.name)] = s
 
-    for i, ((l1, l2), s) in enumerate(sorted(similarities.items(), key=lambda i: i[1], reverse=True)):
-        if i < 20:
-            print l1, l2, s
-        if s == 0:
-            pass
+    #for i, ((l1, l2), s) in enumerate(sorted(similarities.items(), key=lambda i: i[1], reverse=True)):
+    #    if i < 20:
+    #        print l1, l2, s
+    #    if s == 0:
+    #        pass
 
 
 if __name__ == '__main__':

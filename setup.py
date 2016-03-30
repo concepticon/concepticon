@@ -2,14 +2,15 @@ from setuptools import setup, find_packages
 
 
 requires = [
-    'clld>=1.5.0',
-    'clldmpg>=0.5',
+    'clld>=2.1.1',
+    'clldmpg>=2.0.0',
     'markdown',
     'psycopg2',
+    'uritemplate',
 ]
 
 tests_require = [
-    'WebTest >= 1.3.1', # py3 compat
+    'WebTest >= 1.3.1',  # py3 compat
     'mock',
 ]
 

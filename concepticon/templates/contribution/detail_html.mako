@@ -34,7 +34,7 @@
                 % for d in [_d for _d in ctx.data if _d.value]:
                 <dt>${d.key.capitalize()}</dt>
                 <dd>
-                    % if d.key == 'url':
+                    % if d.key.lower() == 'url':
                     ${h.external_link(d.value)}
                     % else:
                     ${d.value}
