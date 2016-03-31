@@ -9,6 +9,8 @@ ${ctx.coins(request)|n}
     <ul class="nav nav-tabs">
         <li class="active"><a href="#tab1" data-toggle="tab">Text</a></li>
         <li><a href="#tab2" data-toggle="tab">BibTeX</a></li>
+        <li><a href="#tab3" data-toggle="tab">RIS</a></li>
+        <li><a href="#tab4" data-toggle="tab">MODS</a></li>
         % if ctx.files:
             <li>${h.external_link(ctx._files[0].jsondata['url'], label='PDF')}</li>
         % endif
@@ -32,6 +34,8 @@ ${ctx.coins(request)|n}
             % endif
         </div>
         <div id="tab2" class="tab-pane"><pre>${bibrec}</pre></div>
+        <div id="tab3" class="tab-pane"><pre>${bibrec.format('ris')}</pre></div>
+        <div id="tab4" class="tab-pane"><pre>${bibrec.format('mods')}</pre></div>
     </div>
 </div>
 
