@@ -62,7 +62,11 @@ class Conceptlists(Contributions):
             LinkCol(self, 'name'),
             ContributorsCol(self, 'compiler'),
             Col(self, 'items', model_col=Conceptlist.items),
-            Col(self, 'uniqueness', model_col=Conceptlist.uniqueness),
+            Col(self,
+                'uniqueness',
+                model_col=Conceptlist.uniqueness,
+                sDescription="Uniqueness of the concept inventory within a concept list: "
+                "How often do the concepts in the list occur in other lists?"),
             Col(self, 'year', model_col=Conceptlist.year),
             SourceLanguagesCol(self, 'source_languages'),
             Col(self, 'target_languages', model_col=Conceptlist.target_languages),
