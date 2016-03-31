@@ -1,6 +1,21 @@
 <%inherit file="../home_comp.mako"/>
 <%namespace name="util" file="../util.mako"/>
 
+<%block name="head">
+    <script src="${request.static_url('concepticon:static/sigmajs/sigma.js')}"></script>
+    <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.parsers.json.min.js')}"></script>
+    <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.layout.forceAtlas2.min.js')}"></script>
+    <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.renderers.edgeLabels.min.js')}"></script>
+    <style type="text/css">
+        #container {
+            max-width: 100%;
+            height: 450px;
+            margin: auto;
+            margin-bottom: 1em;
+        }
+    </style>
+</%block>
+
 <%def name="sidebar()">
     <div style="text-align: center; margin: 1em 5em 1em 5em;">
         <img src="${request.static_url('concepticon:static/logo.png')}"/>
@@ -8,9 +23,9 @@
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
         <p>
-        <a href="http://dx.doi.org/10.5281/zenodo.17199">
-            <img src="https://zenodo.org/badge/5142/clld/concepticon-data.svg">
-        </a>
+            <a href="http://dx.doi.org/10.5281/zenodo.47143">
+                <img src="https://zenodo.org/badge/doi/10.5281/zenodo.47143.svg" alt="10.5281/zenodo.47143">
+            </a>
         </p>
         ${h.cite_button(request, ctx)}
     </%util:well>
@@ -64,6 +79,7 @@ that we consider important will also be extracted from the sources (e.g.
 
 <h3>Concept Sets</h3>
 ## skos:Collection
+<div id="container"></div>
 <p>Most importantly, every concept in every concept list is linked
 to a <a href="${request.route_url('parameters')}"><em>concept set</em></a>, i.e.
     a set of concepts sharing the same definition.
@@ -120,3 +136,29 @@ be added to the concepticon.</p>
             for example.</li>
         <li>Paul Heggarty send me one of his lists.</li>
     </ul>
+
+<script>
+    sigma.parsers.json(
+            '${request.route_url("relations")}',
+            {
+                container: 'container',
+                settings: {
+                    defaultNodeColor: '#ec5148',
+                    defaultEdgeType: 'arrow',
+                    labelSize: 'fixed',
+                    edgeLabelSize: 'fixed',
+                    labelThreshold: 6,
+                    edgeLabelThreshold: 0.01,
+                    defaultLabelSize: 12,
+                    defaultEdgeLabelSize: 10,
+                    drawEdgeLabels: true,
+                    minEdgeSize: 2.5,
+                    maxEdgeSize: 3
+                }
+            },
+            function(s) {
+                s.startForceAtlas2();
+                setTimeout(function() {s.killForceAtlas2();}, 2000);
+            }
+    );
+</script>
