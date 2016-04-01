@@ -12,6 +12,7 @@ class Tests(TestWithApp):
         self.app.get_html('/')
 
     def test_misc(self):
+        self.app.get_json('/relations')
         self.app.get_html('/parameters/1')
         self.app.get_xml('/parameters/1.rdf')
         self.app.get_html('/contributions/Hattori-1973-200')
