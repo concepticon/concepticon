@@ -1,1 +1,72 @@
+.navbar {
+	background-color: DarkGreen;
+	color: white;
+	font-family: serif;
+	text-decoration-color: none;
+	text-shadow: none;
+}
+.navbar-static-top {
+	background-color: DarkGreen;
+	color: white;
+}
+.navbar-inner {
+	background-color: DarkGreen;
+}
+.navbar-inner > .container-fluid {
+	background-color:DarkGreen;
+	color: white;
+	text-decoration: none;
+}
+.navbar .nav > .active > a {
+	background-color: LimeGreen;
+	color: white;
+	text-shadow: 0px 0px 0px 0px;
+	font-weight: bold;
+	border-radius: 25px;
+	margin-top: 2px;
+	margin-bottom: 2px;
 
+}
+.navbar .nav > .active > a:hover {
+	background-color: DarkGreen;
+	text-shadow:none;
+	color: white;
+	font-weight: bold;
+}
+.navbar .nav > li > a {
+	color: white;
+	text-shadow: 0px 0px 0px 0px;
+	font-weight: bold;
+}
+.navbar .nav > li > a:hover {
+	color: white;
+	text-shadow: none;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+
+.navbar .brand {
+	background-color: DarkGreen;
+	text-shadow: none!important;
+	color: white;
+	font-weight: bold;
+}
+
+a {
+	color: DarkGreen;
+	text-decoration: none;
+}
+a:hover {
+	color: LimeGreen;
+	text-decoration: underline;
+}
+
+.btn-info {
+	background-color: DarkGreen;
+	background-image: none;
+}
+.btn-info:hover {
+	background-color: LimeGreen;
+	background-image: none;
+}
