@@ -6,6 +6,10 @@
     <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.parsers.json.min.js')}"></script>
     <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.layout.forceAtlas2.min.js')}"></script>
     <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.renderers.edgeLabels.min.js')}"></script>
+    <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.plugins.animate.min.js')}"></script>
+    <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.plugins.dragNodes.min.js')}"></script>
+    <script src="${request.static_url('concepticon:static/sigmajs/plugins/sigma.layout.noverlap.js')}"></script>
+
     <style type="text/css">
         #container {
             max-width: 100%;
@@ -43,105 +47,103 @@
 <h2>Welcome to the Concepticon</h2>
 
 <p class="lead">
-    This project is an attempt to link the very many different
-    <a href="${request.route_url('contributions')}">concept lists</a>
-    (aka 'Swadesh lists') that are used in the linguistic literature. In practice, we
-    link all entries from the various concept lists to a
-    <a href="${request.route_url('parameters')}">concept set</a>
-    as an intermediate way to reference the concepts.  For a technical discussion of the
-    background of this enterprise, see
-    ${h.external_link('http://bibliography.lingpy.org?key=Poornima2010', label='Poornima & Good (2010)')}.
+  This resource presents an attempt to link the large amount of different concept lists
+  which are used in the linguistic literature, ranging from 
+  <a href="http://en.wikipedia.org/wiki/Swadesh_List">Swadesh lists</a> in
+  historical linguistics to <a href="https://en.wikipedia.org/wiki/Boston_Naming_Test">naming tests</a> in clinical studies and
+  psycholinguistics. 
 </p>
-<h3>Concept Lists</h3>
-## skos:ConceptScheme
-<p>
-    A <em>concept list</em> is a selection of meanings that is deemed interesting by some
-    scholars to compare lexemes between languages. There are very many different
-    reasons why a particular meaning might be included into such a list, and we do
-    not have any preference here for a particular set. The only goal we have here
-    is to link meanings that are found in more than one list, with the goal to be
-    able to compare various datasets, collected on the basis of different
-    concept lists.
-</p>
-<p>
-    In practice, we take any concept list, and reduce it to the main information as
-    found in a particular source. Typically, a concept list will have <em>glosses</em> in
-    one or a few widespread languages, either major scientific languages (like
-    English, Russian, or Spanish) or major languages from the region in which the
-    data is collected (i.e. Hausa for the Chadic list from ${h.link(request, Kraft1981)}).
-    Furthermore, most
-    concept lists have some kind of <em>numerical identification (ID)</em>, sometimes
-    simply an ordering number, which we will also include. Any other information
-    that we consider important will also be extracted from the sources (e.g.
-    <em>semantic field</em> from the
-    ${h.external_link('http://wold.clld.org', label='World Loanword Database, WOLD')}).
-</p>
+<h3>A Resource for the Linking of Concept Lists</h3>
+<div class="row-fluid">
+  <div class="span5">
+    <p class="lead">
+    This resource, our Concepticon, links <a
+	    href="${request.route_url('values')}">concept labels</a> from
+    different <a href="{request.route_url('contributions')}">conceptlists</a>
+    to <a href="${request.route_url('parameters')}">concept sets</a>.  Each
+    concept set is given a unique identifier, a unique label, and a
+    human-readable definition. Concept sets are further structured by defining
+    different relations between the concepts, as you can see in the graphic to
+    the right, which displays the relations between concept sets linked to the
+    concept set <a href="${request.route_url('parameters')}/1640">SIBLING</a>. The
+    resource can be used for various purposes. Serving as a rich reference for
+    new and existing databases in diachronic and synchronic linguistics, it
+    allows researchers a quick access to studies on semantic change,
+    cross-linguistic polysemies, and semantic associations.
+    </p>
+  </div>
+  <div id="container" class="span6"></div>
+</div>
+<div class="row-fluid">
+<p class="lead">
+    If you want to learn more about the ideas behind our Concepticon, have a look at our <a href="${request.route_url('about')}">about</a> page.
+</p></div>
 
-<h3>Concept Sets</h3>
-## skos:Collection
-<p>
-    Most importantly, every concept in every concept list is linked
-    to a <a href="${request.route_url('parameters')}"><em>concept set</em></a>, i.e.
-    a set of concepts sharing the same definition.
-    Depending how you look at it, it is either very hard to define meanings, or
-    very easy. It is very easy, because just anybody can stand up and propose
-    whatever definition s/he wants to define in whatever way deemed interesting. It
-    is very hard to actually come up with definitions that are useful for
-    widespread application across many different languages.
-</p>
-<p>
-    In our Concepticon, we link Concept Sets by assigning simple relations
-    like "broader" and "narrower". Yet even these simple relations can get
-    very complex, as you can see from the network that shows the major
-    kinship relations which are linked to the Concept Set "SIBLING".
-</p>
-<div id="container"></div>
 
-<h3>Concepticon</h3>
-<p>
-    If no suitably defined concept set exists, we simply
-    add a new one. The combined list of all
-    <a href="${request.route_url('parameters')}">concept sets</a> is the concepticon.
-</p>
-<p>
-    We also add a
-    rough <em>gloss</em> to each concept set, but this is not supposed to be taken as the
-    definition, just as a convenience abbreviation.
-    An attempt to give a more precise definition of each concept set is made, currently by
-    taking Definitions from (and links to)
-   ${h.external_link('http://www.omegawiki.org/', label='OmegaWiki')}.
-</p>
-<p>
-    For convenience, it also includes <em>semantic fields</em> from the World Loanword Database
-    (extended by us for new meanings that are not
-    included there) and <em>ontological categories</em>. The ontological categories
-    are not supposed to be cross-linguistically comparable (they are
-    not!), but only a help to better identify the meaning, and as a way to order
-    the different meanings.
-</p>
 
 <script>
-    sigma.parsers.json(
-            '${request.route_url("relations")}',
-            {
-                container: 'container',
-                settings: {
-                    defaultNodeColor: '#ec5148',
-                    defaultEdgeType: 'arrow',
-                    labelSize: 'fixed',
-                    edgeLabelSize: 'fixed',
-                    labelThreshold: 6,
-                    edgeLabelThreshold: 0.01,
-                    defaultLabelSize: 12,
-                    defaultEdgeLabelSize: 10,
-                    drawEdgeLabels: true,
-                    minEdgeSize: 2.5,
-                    maxEdgeSize: 3
-                }
-            },
-            function(s) {
-                s.startForceAtlas2();
-                setTimeout(function() {s.killForceAtlas2();}, 2000);
-            }
-    );
+sigma.parsers.json(
+    '${request.route_url("relations")}',
+    {
+      container: 'container',
+      settings: {
+        defaultNodeColor: '#006400',
+        labelSize: 'fixed',
+	defaultEdgeType: 'curve',
+        edgeLabelSize: 'fixed',
+        labelThreshold: 4,
+        labelSizeRatio: 4,
+        edgeLabelThreshold: 0.01,
+        defaultLabelSize: 8,
+        defaultEdgeLabelSize: 4,
+        drawEdgeLabels: true,
+        minEdgeSize: 1.25,
+        maxEdgeSize: 1.25
+      }
+    },
+    function(s) {
+      for (var i=0,edge; edge=s.graph.edges()[i]; i++) {
+        edge['color'] = '#222222';
+	edge['arrow'] = 'source';
+      }
+      for (var i=0,node; node=s.graph.nodes()[i]; i++) {
+	if (node['label'] == 'SIBLING') {
+	  node['color'] = '#DC143C';
+	  node['size'] = 1.5;
+	}
+      }
+      var noverlapListener = s.configNoverlap({
+        nodeMargin: 5,
+        scaleNodes: 1.05,
+        gridSize: 75,
+        easing: 'quadraticInOut', 
+        duration: 500  
+      });
+      // Bind the events:
+      noverlapListener.bind('start stop interpolate', function(e) {
+        console.log(e.type);
+        if(e.type === 'start') {
+          console.time('noverlap');
+        }
+        if(e.type === 'interpolate') {
+          console.timeEnd('noverlap');
+        }
+      });
+      s.startForceAtlas2();
+      setTimeout(function() {s.killForceAtlas2();}, 1000);
+      var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+      dragListener.bind('startdrag', function(event) {
+        console.log(event);
+      });
+      dragListener.bind('drag', function(event) {
+        console.log(event);
+      });
+      dragListener.bind('drop', function(event) {
+        console.log(event);
+      });
+      dragListener.bind('dragend', function(event) {
+        console.log(event);
+      });
+    }
+);
 </script>
