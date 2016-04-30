@@ -142,7 +142,8 @@ class Concepts(Values):
             pass
         else:
             query = query.join(ValueSet.parameter)
-            query = query.options(joinedload_all(Value.valueset, ValueSet.parameter))
+            query = query.options(joinedload_all(Value.valueset,
+                ValueSet.parameter))
         return query
 
     def col_defs(self):
