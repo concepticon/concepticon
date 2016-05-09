@@ -27,8 +27,8 @@
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
         <p>
-            <a href="http://dx.doi.org/10.5281/zenodo.47143">
-                <img src="https://zenodo.org/badge/doi/10.5281/zenodo.47143.svg" alt="10.5281/zenodo.47143">
+            <a href="http://dx.doi.org/10.5281/zenodo.51175">
+                <img src="https://zenodo.org/badge/doi/10.5281/zenodo.51175.svg" alt="10.5281/zenodo.51175">
             </a>
         </p>
         ${h.cite_button(request, ctx)}
@@ -40,18 +40,19 @@
         of data curated at
         ${h.external_link('https://github.com/clld/concepticon-data', label='clld/concepticon-data')} -
         currently the
-        ${h.external_link('https://github.com/clld/concepticon-data/releases/tag/v1.0', label='v1.0')}
+        ${h.external_link('https://github.com/clld/concepticon-data/releases/tag/v1.0.1', label='release 1.0.1')}
     </%util:well>
 </%def>
 
 <h2>Welcome to the Concepticon</h2>
 
 <p class="lead">
-  This resource presents an attempt to link the large amount of different concept lists
-  which are used in the linguistic literature, ranging from 
-  <a href="http://en.wikipedia.org/wiki/Swadesh_List">Swadesh lists</a> in
-  historical linguistics to <a href="https://en.wikipedia.org/wiki/Boston_Naming_Test">naming tests</a> in clinical studies and
-  psycholinguistics. 
+    This resource presents an attempt to link the large amount of different concept lists
+    which are used in the linguistic literature, ranging from
+    ${h.external_link('http://en.wikipedia.org/wiki/Swadesh_List', label='Swadesh lists')}
+    in historical linguistics to
+    ${h.external_link('https://en.wikipedia.org/wiki/Boston_Naming_Test', label='naming tests')}
+    in clinical studies and psycholinguistics.
 </p>
 <h3>A Resource for the Linking of Concept Lists</h3>
 <div class="row-fluid">

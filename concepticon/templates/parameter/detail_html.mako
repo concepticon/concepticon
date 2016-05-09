@@ -6,7 +6,7 @@
 <h2>${_('Parameter')} ${ctx.name}</h2>
 
 % if ctx.description:
-<p class="alert alert-info">${ctx.description}</p>
+<p class="alert alert-success">${ctx.description}</p>
 % endif
 
 % if ctx.rel_to or ctx.rel_from:

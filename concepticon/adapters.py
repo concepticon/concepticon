@@ -1,2 +1,91 @@
+# coding: utf8
+from __future__ import unicode_literals
+from collections import OrderedDict
+from zipfile import ZIP_DEFLATED, ZipFile
+from json import dumps
+
+from sqlalchemy.orm import joinedload_all
+from clldutils.path import Path, remove, move
+
+from clld.db.meta import DBSession
+from clld.db.models.common import Parameter, ValueSet, Value
+from clld.web.adapters.download import Download, README
+from clld.web.adapters.md import TxtCitation
+
+from concepticon.models import ConceptSet
+
+
+JSON_DESC = """
+Description
+-----------
+
+The file conceptset.json conains information about concept sets labels and alternative
+labels used in concept lists in the following format:
+
+```
+{
+    "conceptset_labels": {
+        "run": [
+            "1519",
+            "RUN"
+        ],
+        ...
+    }
+    "alternative_labels": {
+        "to run": [
+            "1519",
+            "RUN"
+        ],
+        ...
+    }
+}
+```
+
+The `conceptset_labels` dictionary maps the lowercased english unique concept set label
+to pairs `(CONCEPTSET_ID, CONCEPTSET_LABEL)`, while
+the `alternative_labels` dictionary maps the lowercased english labels encountered in
+concept lists to pairs `(CONCEPTSET_ID, CONCEPTSET_LABEL)`.
+"""
+
+
+class ConceptSetLabels(Download):
+    ext = 'json'
+    description = "Concept sets and alternative labels as JSON"
+
+    def create(self, req, filename=None, verbose=True):
+        p = self.abspath(req)
+        if not p.parent.exists():  # pragma: no cover
+            p.parent.mkdir()
+        tmp = Path('%s.tmp' % p.as_posix())
+
+        with ZipFile(tmp.as_posix(), 'w', ZIP_DEFLATED) as zipfile:
+            zipfile.writestr(self.name, dumps(create(), indent=4))
+            zipfile.writestr(
+                'README.txt',
+                README.format(
+                    req.dataset.name,
+                    '=' * (len(req.dataset.name) + len(' data download')),
+                    req.dataset.license,
+                    TxtCitation(None).render(req.dataset, req)).encode('utf8') +
+                JSON_DESC)
+        if p.exists():  # pragma: no cover
+            remove(p)
+        move(tmp, p)
+
+
+def create():
+    res = dict(conceptset_labels=OrderedDict(), alternative_labels=OrderedDict())
+    for cs in DBSession.query(Parameter) \
+            .options(joinedload_all(Parameter.valuesets, ValueSet.values, Value.data)) \
+            .order_by(Parameter.name):
+        res['conceptset_labels'][cs.name.lower()] = (cs.id, cs.name)
+        for vs in cs.valuesets:
+            for value in vs.values:
+                for k, v in value.datadict().items():
+                    if k == 'lang_english':
+                        res['alternative_labels'][v.lower()] = (cs.id, cs.name)
+    return res
+
+
 def includeme(config):
-    pass
+    config.register_download(ConceptSetLabels(ConceptSet, 'concepticon'))

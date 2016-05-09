@@ -12,7 +12,9 @@ from clld.web.util.helpers import linked_references
 from clld.web.util.htmllib import HTML
 from clld.db.meta import DBSession
 from clld.db.models.common import (
-    Value, Value_data, ValueSet, Parameter, ContributionContributor)
+    Value, Value_data, ValueSet, Parameter, Contribution, ContributionContributor,
+    ContributionReference,
+)
 from clld.db.util import get_distinct_values, icontains
 
 from concepticon.models import ConceptSet, Concept, Conceptlist
@@ -56,6 +58,12 @@ class SourceLanguagesCol(Col):
 
 
 class Conceptlists(Contributions):
+    def base_query(self, query):
+        return query.options(
+            joinedload_all(
+                Contribution.contributor_assocs, ContributionContributor.contribution),
+            joinedload_all(Contribution.references, ContributionReference.source))
+
     def col_defs(self):
         return [
             DetailsRowLinkCol(self, 'd', sTitle='Note'),

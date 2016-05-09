@@ -40,7 +40,7 @@ def main(args):
 
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="Concepticon 1.0",
+        name="Concepticon",
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
         publisher_url="http://www.shh.mpg.de",

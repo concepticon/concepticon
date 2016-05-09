@@ -4,9 +4,9 @@
 <h2>About the Concepticon</h2>
 
 <p class="lead">
-    A paper introducing our Concepticon will be presented at <a
-	    href="http://lrec2016.lrec-conf.org/">LREC 2016</a> <a
-	    href="${request.static_url('concepticon:static/list-cysouw-forkel-2016-concepticon-introduction.pdf')}">[PDF]</a>.
+    A paper introducing our Concepticon will be presented at
+    ${h.external_link('http://lrec2016.lrec-conf.org/', label='LREC 2016')}
+    <a href="${request.static_url('concepticon:static/list-cysouw-forkel-2016-concepticon-introduction.pdf')}">[PDF]</a>.
     For more details, see below.
 </p>
 
