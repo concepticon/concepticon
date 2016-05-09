@@ -63,7 +63,7 @@ def main(args):
     files = {}
     for fname in data_path('sources').iterdir():
         files[fname.stem] = \
-            "https://github.com/clld/concepticon-data/blob/master/concepticondata/sources/%s" % fname.name
+            "https://github.com/clld/concepticon-data/raw/master/concepticondata/sources/%s" % fname.name
 
     for rec in Database.from_file(
             data_path('references', 'references.bib'), lowercase=True):
