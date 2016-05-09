@@ -11,6 +11,14 @@ $ clld-create-downloads development.ini
 ```
 
 - Make sure the tests pass
+```
+$ tox
+  ...
+  py34: commands succeeded
+  py27: commands succeeded
+  congratulations :)
+```
+
 - Commit and push all changes
 - Create a release of clld/concepticon with the same version number as the data release.
 - Deploy to http://concepticon.clld.org
