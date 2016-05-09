@@ -54,7 +54,7 @@
     <a href="http://bibliography.lingpy.org?key=Poornima2010">Poornima and Good (2010)</a>.
 </p>
 <p>
-    To each concept set, we add a rough rough <em>gloss</em>, but this is not
+    To each concept set, we add a rough <em>gloss</em>, but this is not
     supposed to be taken as the definition, just as a convenience abbreviation
     that offers further clarification as to what concept we try to describe.
     An attempt to give a more precise definition of each concept set is made by
