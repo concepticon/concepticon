@@ -28,7 +28,7 @@ class Tests(TestWithApp):
         self.app.get_dt('/values?parameter=2')
         self.app.get_dt('/values?contribution=Brinton-1891-21&iSortingCols=2&iSortCol_0=0&iSortCol_1=1&sSearch_1=a')
         self.app.get_xml('/values/Matisoff-1978-200-65.rdf')
-        self.app.get_html('/sources/haspelmath2009a')
+        self.app.get_html('/sources/haspelmath2009')
         self.app.get_dt('/contributors')
         self.app.get('/search_concept', status=404)
         self.app.get('/search_concept?url=http://wold.clld.org/meaning/12-42', status=302)

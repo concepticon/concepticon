@@ -1,8 +1,8 @@
 from __future__ import unicode_literals, division
 import sys
 import re
-from itertools import combinations
 from collections import Counter
+from importlib import import_module
 
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
@@ -14,6 +14,12 @@ from clldutils.misc import slug
 
 import concepticon
 from concepticon import models
+
+
+# Missing data (in the sources) is marked using a dash. We don't import these markers in
+# the database but regard absence of data in the database as absence of data in the
+# sources.
+NA = '-'
 
 
 def reader(*args, **kw):
@@ -60,10 +66,13 @@ def main(args):
         id='eng',
         name='English')
 
+    for name, description in import_module('concepticondata.data').CL_TYPES.items():
+        data.add(models.Tag, name, id=slug(name), name=name, description=description)
+
     files = {}
     for fname in data_path('sources').iterdir():
         files[fname.stem] = \
-            "https://github.com/clld/concepticon-data/raw/master/concepticondata/sources/%s" % fname.name
+            "https://raw.githubusercontent.com/clld/concepticon-data/master/concepticondata/sources/%s" % fname.name
 
     for rec in Database.from_file(
             data_path('references', 'references.bib'), lowercase=True):
@@ -74,6 +83,13 @@ def main(args):
                 mime_type='application/pdf',
                 object_pk=source.pk,
                 jsondata=dict(url=files[rec.id])))
+
+    data.add(
+        models.ConceptSet,
+        NA,
+        id='0',
+        name='<NA>',
+        description='Set of all concepts not yet mapped to a meaningful concept set')
 
     for concept in reader(data_path('concepticon.tsv'), namedtuples=True):
         data.add(
@@ -91,7 +107,7 @@ def main(args):
             target=data['ConceptSet'][rel.TARGET],
             description=rel.RELATION))
 
-    unmapped = Counter()
+    missing_translations = Counter()
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
 
     for cl in reader(data_path('conceptlists.tsv'), dicts=True):
@@ -112,6 +128,14 @@ def main(args):
         for id_ in split(cl['REFS']):
             common.ContributionReference(
                 source=data['Source'][id_], contribution=conceptlist)
+
+        for tag in split(cl['TAGS']):
+            DBSession.add(models.ConceptlistTag(
+                conceptlist=conceptlist, tag=data['Tag'][tag]))
+        else:
+            DBSession.add(models.ConceptlistTag(
+                conceptlist=conceptlist, tag=data['Tag']['specific']))
+
         for i, name in enumerate(split(cl['AUTHOR'], sep=' and ')):
             name = strip_braces(name)
             contrib = data['Contributor'].get(name)
@@ -124,31 +148,33 @@ def main(args):
             del cl[k]
         DBSession.flush()
         for k, v in cl.items():
-            DBSession.add(common.Contribution_data(
-                object_pk=conceptlist.pk, key=k, value=v))
+            if k not in ['ITEMS', 'TAGS', 'PDF'] and v and v != NA:
+                DBSession.add(common.Contribution_data(
+                    object_pk=conceptlist.pk, key=k, value=v))
 
         for concept in reader(concepts, namedtuples=True):
-            if not concept.ID or not concept.CONCEPTICON_ID or concept.CONCEPTICON_ID == 'NAN':
-                #print conceptlist.id, getattr(concept, 'ENGLISH', getattr(concept, 'GLOSS', None))
-                unmapped.update([conceptlist.id])
-                continue
-
+            assert concept.ID
             lgs = {}
             for lang in langs:
                 v = getattr(concept, lang.upper())
                 if v:
-                    lgs[lang] = v
+                    if v == NA:
+                        missing_translations.update([conceptlist.id])
+                    else:
+                        lgs[lang] = v
+                else:
+                    raise ValueError(
+                        'missing %s translation in %s' % (lang, conceptlist.id))
 
             match = number_pattern.match(concept.NUMBER)
             if not match:
-                print(concept.ID)
                 raise ValueError
             vs = common.ValueSet(
                 id=concept.ID,
                 description=getattr(concept, 'GLOSS', getattr(concept, 'ENGLISH', None)),
                 language=english,
                 contribution=conceptlist,
-                parameter=data['ConceptSet'][concept.CONCEPTICON_ID])
+                parameter=data['ConceptSet'][concept.CONCEPTICON_ID or NA])
             d = {}
             for key, value in concept.__dict__.items():
                 if not key.startswith('CONCEPTICON_') and \
@@ -167,8 +193,8 @@ def main(args):
                 DBSession.add(
                     common.Value_data(key='lang_' + key, value=value, object_pk=v.pk))
 
-    print('Unmapped concepts:')
-    for clid, no in unmapped.most_common():
+    print('Missing translations:')
+    for clid, no in missing_translations.most_common():
         print(clid, no)
 
     for fname in data_path('concept_set_meta').iterdir():

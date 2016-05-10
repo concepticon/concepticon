@@ -17,7 +17,7 @@ from clld.db.models.common import (
 )
 from clld.db.util import get_distinct_values, icontains
 
-from concepticon.models import ConceptSet, Concept, Conceptlist
+from concepticon.models import ConceptSet, Concept, Conceptlist, ConceptlistTag, Tag
 
 
 class Compilers(Contributors):
@@ -57,12 +57,31 @@ class SourceLanguagesCol(Col):
         return icontains(Conceptlist.source_languages, qs)
 
 
+class TagsCol(Col):
+    __kw__ = {'bSortable': False}
+
+    def format(self, item):
+        return HTML.ul(
+            *[HTML.li(
+                HTML.span(t.name, **{
+                    'data-hint': t.description,
+                    'class': 'hint--bottom label label-success'})) for t in item.tags],
+            **{'class': 'unstyled'})
+
+    def search(self, qs):
+        return Tag.id == qs
+
+
 class Conceptlists(Contributions):
     def base_query(self, query):
+        query = query.join(Conceptlist.tag_assocs, ConceptlistTag.tag)
         return query.options(
             joinedload_all(
+                Conceptlist.tag_assocs, ConceptlistTag.tag),
+            joinedload_all(
                 Contribution.contributor_assocs, ContributionContributor.contribution),
-            joinedload_all(Contribution.references, ContributionReference.source))
+            joinedload_all(
+                Contribution.references, ContributionReference.source))
 
     def col_defs(self):
         return [
@@ -70,6 +89,7 @@ class Conceptlists(Contributions):
             LinkCol(self, 'name'),
             ContributorsCol(self, 'compiler'),
             Col(self, 'items', model_col=Conceptlist.items),
+            TagsCol(self, 'tags', choices=[(t.id, t.name) for t in DBSession.query(Tag)]),
             Col(self,
                 'uniqueness',
                 model_col=Conceptlist.uniqueness,

@@ -78,12 +78,13 @@ def create():
     for cs in DBSession.query(Parameter) \
             .options(joinedload_all(Parameter.valuesets, ValueSet.values, Value.data)) \
             .order_by(Parameter.name):
-        res['conceptset_labels'][cs.name.lower()] = (cs.id, cs.name)
-        for vs in cs.valuesets:
-            for value in vs.values:
-                for k, v in value.datadict().items():
-                    if k == 'lang_english':
-                        res['alternative_labels'][v.lower()] = (cs.id, cs.name)
+        if int(cs.id):
+            res['conceptset_labels'][cs.name.lower()] = (cs.id, cs.name)
+            for vs in cs.valuesets:
+                for value in vs.values:
+                    for k, v in value.datadict().items():
+                        if k == 'lang_english':
+                            res['alternative_labels'][v.lower()] = (cs.id, cs.name)
     return res
 
 

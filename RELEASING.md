@@ -22,4 +22,11 @@ $ tox
 - Commit and push all changes
 - Create a release of clld/concepticon with the same version number as the data release.
 - Deploy to http://concepticon.clld.org
+```
+$ fab tasks.deploy:production
+```
+
 - Copy downloads
+```
+$ fab tasks.copy_downloads:production
+```

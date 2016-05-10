@@ -12,17 +12,31 @@
             </li>
             % endfor
         </ul>
+            <h4>Tags</h4>
+            <ul class="inline">
+            % for tag in ctx.tags:
+            <li>
+                <span class="hint--left label label-success" data-hint="${tag.description}">${tag.name}</span>
+            </li>
+            % endfor
+        </ul>
         <h4>Source</h4>
         <ul class="unstyled">
             % for ref in ctx.references:
             <li>
                 ${h.link(request, ref.source)}
+                % if 'PAGES' in ctx.datadict():
+                    (${ctx.datadict()['PAGES']})
+                % endif
                 % if ref.source.files:
                     [${h.external_link(ref.source._files[0].jsondata['url'], label='PDF')}]
                 % endif
             </li>
             % endfor
         </ul>
+        % if 'URL' in ctx.datadict():
+            ${h.external_link(ctx.datadict()['URL'])}
+        % endif
         <h4>Target languages</h4>
             <p>${ctx.target_languages}</p>
         <h4>Note</h4>
@@ -46,15 +60,9 @@
             </table>
         % if ctx.data:
             <dl>
-                % for d in [_d for _d in ctx.data if _d.value]:
+                % for d in [_d for _d in ctx.data if _d.value and _d.key not in ['PAGES', 'URL']]:
                 <dt>${d.key.capitalize()}</dt>
-                <dd>
-                    % if d.key.lower() == 'url':
-                    ${h.external_link(d.value)}
-                    % else:
-                    ${d.value}
-                    % endif
-                </dd>
+                <dd>${d.value}</dd>
                 % endfor
             </dl>
         % endif

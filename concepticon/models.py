@@ -114,6 +114,10 @@ class Relation(Base):
     target = relationship(ConceptSet, foreign_keys=[target_pk], backref='rel_from')
 
 
+class Tag(Base, IdNameDescriptionMixin):
+    pass
+
+
 @implementer(interfaces.IContribution)
 class Conceptlist(CustomModelMixin, Contribution):
     pk = Column(Integer, ForeignKey('contribution.pk'), primary_key=True)
@@ -129,3 +133,15 @@ class Conceptlist(CustomModelMixin, Contribution):
             yield 'skos:hasTopConcept', request.resource_url(vs.values[0])
         for ref in self.references:
             yield 'dcterms:source', request.resource_url(ref.source)
+
+    @property
+    def tags(self):
+        return [ta.tag for ta in self.tag_assocs]
+
+
+class ConceptlistTag(Base):
+    conceptlist_pk = Column(Integer, ForeignKey('conceptlist.pk'))
+    tag_pk = Column(Integer, ForeignKey('tag.pk'))
+
+    conceptlist = relationship(Conceptlist, backref='tag_assocs')
+    tag = relationship(Tag, backref='conceptlist_assocs')
