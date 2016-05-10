@@ -80,7 +80,7 @@
   The development of the Concepticon in its current version was supported by the
   DFG research fellowship grant 261553824 <a href="http://gepris.dfg.de/gepris/projekt/261553824?language=en">Vertical and lateral aspects of
   Chinese dialect history</a> (JML) and the ERC starting grant 240816
-  <a href="http://quanthistling.info/">Quantitative modelling of historicalcompara- tive linguistics</a> (JML,
+  <a href="http://quanthistling.info/">Quantitative modelling of historical comparative linguistics</a> (JML,
   MC). As part of the <a href="http://clld.org">CLLD Project</a> 
   and the <a href="http://glottobank.org">Glottobank Project</a>, 
   the work was further supported by the Max Planck Society, the Max Planck Institute for the Science of Human
