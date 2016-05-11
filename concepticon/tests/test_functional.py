@@ -1,5 +1,7 @@
 from clldutils.path import Path
 from clld.tests.util import TestWithApp
+from clld.db.meta import DBSession
+from clld.db.models.common import Contribution
 
 import concepticon
 
@@ -22,7 +24,6 @@ class Tests(TestWithApp):
         self.app.get_xml('/parameters/127.rdf')
         self.app.get_xml('/parameters/2209.rdf')
         self.app.get_xml('/parameters/2140.rdf')
-        self.app.get_dt('/contributions')
         self.app.get_dt('/contributions?sSearch_5=chinese')
         self.app.get_dt('/values?iSortingCols=1&iSortCol_0=0')
         self.app.get_dt('/values?parameter=2')
@@ -32,3 +33,8 @@ class Tests(TestWithApp):
         self.app.get_dt('/contributors')
         self.app.get('/search_concept', status=404)
         self.app.get('/search_concept?url=http://wold.clld.org/meaning/12-42', status=302)
+
+    def test_conceptlists(self):
+        self.app.get_dt('/contributions')
+        self.assertEqual(
+            self.app.parsed_body['iTotalRecords'], DBSession.query(Contribution).count())

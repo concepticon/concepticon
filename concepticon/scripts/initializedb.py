@@ -129,10 +129,12 @@ def main(args):
             common.ContributionReference(
                 source=data['Source'][id_], contribution=conceptlist)
 
-        for tag in split(cl['TAGS']):
+        has_tags = False
+        for tag in set(split(cl['TAGS'])):
+            has_tags = True
             DBSession.add(models.ConceptlistTag(
                 conceptlist=conceptlist, tag=data['Tag'][tag]))
-        else:
+        if not has_tags:
             DBSession.add(models.ConceptlistTag(
                 conceptlist=conceptlist, tag=data['Tag']['specific']))
 
