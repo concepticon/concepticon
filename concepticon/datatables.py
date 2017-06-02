@@ -137,7 +137,7 @@ class ConceptInSourceCol(Col):
         Col.__init__(self, dt, name, **kw)
 
     def format(self, item):
-        return item.datadict()['lang_' + self.name]
+        return item.datadict().get('lang_' + self.name, '')
 
     def order(self):
         return self.alias.value
