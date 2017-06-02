@@ -2,11 +2,12 @@ from setuptools import setup, find_packages
 
 
 requires = [
-    'clld>=2.1.1',
-    'clldmpg>=2.0.0',
+    'clld>=3.1.1',
+    'clldmpg>=2.4.1',
     'markdown',
     'psycopg2',
     'uritemplate',
+    'pyconcepticon',
 ]
 
 tests_require = [
@@ -25,9 +26,9 @@ setup(name='concepticon',
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
-      author_email='',
-      url='',
+      author='Robert Forkel',
+      author_email='forkel@shh.mpg.de',
+      url='http://concepticon.clld.org',
       keywords='web pyramid pylons',
       packages=find_packages(),
       include_package_data=True,
