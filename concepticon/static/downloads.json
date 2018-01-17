@@ -1,0 +1,29 @@
+{
+    "1.0": {
+        "bitstreams": [
+            {
+                "last-modified": 1516189151386,
+                "checksum": "8ee9e8875082bf06375741e4e803dbf9",
+                "created": 1516189151279,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_conceptset.json.zip",
+                "filesize": 101529,
+                "content-type": "application/zip"
+            },
+            {
+                "last-modified": 1516189178126,
+                "checksum": "93ac2ee1d984321d6d39a996e55a07e3",
+                "created": 1516189177961,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_dataset.cldf.zip",
+                "filesize": 1504354,
+                "content-type": "application/zip"
+            }
+        ],
+        "oid": "EAEA0-2178-2FAB-2BCE-0",
+        "metadata": {
+            "title": "concepticon 1.0 - downloads",
+            "creator": "pycdstar"
+        }
+    }
+}
