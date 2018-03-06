@@ -49,7 +49,12 @@ def main(args):
             'license_icon': 'cc-by.png',
             'license_name': 'Creative Commons Attribution 4.0 International License'})
     DBSession.add(dataset)
-    for i, name in enumerate(['Johann-Mattis List', 'Michael Cysouw', 'Robert Forkel']):
+    for i, name in enumerate([
+        'Johann-Mattis List',
+        'Michael Cysouw',
+        'Simon Greenhill',
+        'Robert Forkel',
+    ]):
         c = common.Contributor(id=slug(name), name=name)
         dataset.editors.append(common.Editor(contributor=c, ord=i))
 

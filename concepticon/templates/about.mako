@@ -88,28 +88,56 @@
   RF). All support is gratefully acknowledged. 
 </p>
 <p>
-  Many people helped us in many ways in assembling the data. They pointed us to
-  missing lists (M), provided scans (S), digitized data (D), typed off and
-  corrected concept lists (C), provided translations (T), linked concept lists
-  (L), or gave important advice (A). For all this help, we are very grateful and
-  express our gratitude to
-  <ul>
-    <li>Alexei Kassian (D),</li>
-    <li>Andrew Kitchen (D),</li>
-    <li>Damian Satterthwaite-Phillips (D),</li>
-    <li>Frederike Urke (CLS),</li>
-    <li>Harald Hammarström (DMS),</li>
-    <li>Julia Fischer (SDT),</li>
-    <li>Lars Borin (DL),</li>
-    <li>Martin Haspelmath (AD),</li>
-    <li>Nicholas Evans (A),</li>
-    <li>Paul Heggarty (D),</li>
-    <li>Robert Blust (D),</li>
-    <li>Sean Lee (D),</li>
-    <li>Sebastian Nicolai (CMS),</li>
-    <li>Thiago Chacon (MSD), and</li>
-    <li>Viola Kirchhoff da Cruz (CLS).</li>
-  </ul>
+    Many people helped us in many
+ways in assembling the data. They pointed us to missing
+lists (M), provided scans (S), digitized data (D), typed off
+and corrected concept lists (C), provided translations (T),
+linked concept lists (L), provided corrections of concept definitions and concept linkings (P), or gave important advice (A), and (G) contributed new data via the GitHub-Workflow.
+</p>
+<p>
+    For all this help, we are very grateful and express our gratitude.
 </p>
 
-
+<table class="table table-condensed table-nonfluid">
+    <thead>
+        <tr>Name</tr>
+        <tr>Contribution</tr>
+        <tr>Version</tr>
+    </thead>
+    <tbody>
+    <tr><td>Alexei Kassian</td><td>| D</td><td>1.0</td></tr>
+    <tr><td>Andreea Calude</td><td>D</td><td>1.1</td></tr>
+    <tr><td>Andrew Kitchen</td><td>D</td><td>1.0</td></tr>
+    <tr><td>Anja Gampe</td><td>D</td><td>1.1</td></tr>
+    <tr><td>Anthony Grant</td><td>MS</td><td>1.1</td></tr>
+    <tr><td>Ben Yackley</td><td>P</td><td>1.1</td></tr>
+    <tr><td>Christoph Rzymski</td><td>1.1</td></tr>
+    <tr><td>Claire Bowern</td><td>D</td><td>1.1</td></tr>
+    <tr><td>Cormac Anderson</td><td>C</td><td>1.1</td></tr>
+    <tr><td>Damian Satterthwaite-Phillips</td><td>D</td><td>1.0</td></tr>
+    <tr><td>Doug Cooper</td><td>DCSM</td><td>1.1</td></tr>
+    <tr><td>Evgeniya Korovina</td><td>MSCLPA</td><td>1.1</td></tr>
+    <tr><td>Frederike Urke</td><td>CLS</td><td>1.0</td></tr>
+    <tr><td>Harald Hammarström</td><td>DMS</td><td>1.0</td></tr>
+    <tr><td>Isabella Boga</td><td>LP</td><td>1.1</td></tr>
+    <tr><td>Jan Auracher</td><td>D</td><td>1.1</td></tr>
+    <tr><td>Johannes Dellert</td><td>LPD</td><td>1.1</td></tr>
+    <tr><td>Julia Fischer</td><td>SDT</td><td>1.0</td></tr>
+    <tr><td>Lars Borin</td><td>DL</td><td>1.0</td></tr>
+    <tr><td>Magdalena Łuniewska</td><td>D</td><td>1.1</td></tr>
+    <tr><td>Martin Haspelmath</td><td>AD</td><td>1.0</td></tr>
+    <tr><td>Maurizio Serva</td><td>MD</td><td>1.1</td></tr>
+    <tr><td>Michael Dunn</td><td>G</td><td>1.1</td></tr>
+    <tr><td>Nathan Hill</td><td>MSDP</td><td>1.1</td></tr>
+    <tr><td>Nicholas Evans</td><td>A</td><td>1.0</td></tr>
+    <tr><td>Paul Heggarty</td><td>D</td><td>1.0</td></tr>
+    <tr><td>Quentin Atkinson</td><td>MD</td><td>1.1</td></tr>
+    <tr><td>Robert Blust</td><td>D</td><td>1.0</td></tr>
+    <tr><td>Sean Lee</td><td>D</td><td>1.0</td></tr>
+    <tr><td>Sebastian Nicolai</td><td>CMS</td><td>1.0</td></tr>
+    <tr><td>Thiago Chacon</td><td>MSD</td><td>1.0, 1.1</td></tr>
+    <tr><td>Tiago Tresoldi</td><td>CTLG</td><td>1.1</td></tr>
+    <tr><td>Viola Kirchhoff da Cruz</td><td>CLS</td><td>1.0</td></tr>
+    <tr><td>Wang Feng</td><td>D</td><td>1.0</td></tr>
+    </tbody>
+</table>
