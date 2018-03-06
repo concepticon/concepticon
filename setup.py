@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clld~=4.0',
+        'clld>=4.1.1',
         'clldmpg~=3.1',
         'markdown',
         'uritemplate',

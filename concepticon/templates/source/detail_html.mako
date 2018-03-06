@@ -11,9 +11,6 @@ ${ctx.coins(request)|n}
         <li><a href="#tab2" data-toggle="tab">BibTeX</a></li>
         <li><a href="#tab3" data-toggle="tab">RIS</a></li>
         <li><a href="#tab4" data-toggle="tab">MODS</a></li>
-        % if ctx.files:
-            <li>${h.external_link(ctx._files[0].jsondata['url'], label='PDF')}</li>
-        % endif
     </ul>
     <div class="tab-content">
         <% bibrec = ctx.bibtex() %>
@@ -31,6 +28,11 @@ ${ctx.coins(request)|n}
             % if ctx.jsondata.get('internetarchive_id'):
                 <hr />
                 <iframe src='https://archive.org/stream/${ctx.jsondata.get('internetarchive_id')}?ui=embed#mode/1up' width='680px' height='750px' frameborder='1' ></iframe>
+            % endif
+            % if ctx._files:
+                <p>
+                    ${u.cdstar.link(ctx._files[0])}
+                </p>
             % endif
         </div>
         <div id="tab2" class="tab-pane"><pre>${bibrec}</pre></div>

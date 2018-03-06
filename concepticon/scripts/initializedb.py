@@ -1,16 +1,17 @@
+# coding: utf-8
 from __future__ import unicode_literals, division
 import sys
 import re
 from collections import Counter
-from importlib import import_module
+from decimal import Decimal
 
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.bibtex import Database
-from clldutils.dsv import reader as _reader
-from clldutils.jsonlib import load
 from clldutils.misc import slug
+from clldutils.jsonlib import load
+from pyconcepticon.api import Concepticon
 
 import concepticon
 from concepticon import models
@@ -20,15 +21,6 @@ from concepticon import models
 # the database but regard absence of data in the database as absence of data in the
 # sources.
 NA = '-'
-
-
-def reader(*args, **kw):
-    kw.setdefault('delimiter', '\t')
-    return _reader(*args, **kw)
-
-
-def split(s, sep=','):
-    return [ss.strip() for ss in s.split(sep) if ss.strip()]
 
 
 def strip_braces(s):
@@ -42,8 +34,8 @@ def strip_braces(s):
 
 def main(args):
     data = Data()
-    data_path = lambda *cs: args.data_file('concepticon-data', 'concepticondata', *cs)
 
+    api = Concepticon(args.data_file('concepticon-data'))
     dataset = common.Dataset(
         id=concepticon.__name__,
         name="Concepticon",
@@ -61,28 +53,19 @@ def main(args):
         c = common.Contributor(id=slug(name), name=name)
         dataset.editors.append(common.Editor(contributor=c, ord=i))
 
-    english = data.add(
-        common.Language, 'eng',
-        id='eng',
-        name='English')
+    TAGS = {k: v for k, v in load(api.data_path('concepticon.json'))['TAGS'].items()}
 
-    for name, description in import_module('concepticondata.data').CL_TYPES.items():
+    english = data.add(common.Language, 'eng', id='eng', name='English')
+    for name, description in TAGS.items():
         data.add(models.Tag, name, id=slug(name), name=name, description=description)
 
-    files = {}
-    for fname in data_path('sources').iterdir():
-        files[fname.stem] = \
-            "https://raw.githubusercontent.com/clld/concepticon-data/master/concepticondata/sources/%s" % fname.name
-
-    for rec in Database.from_file(
-            data_path('references', 'references.bib'), lowercase=True):
-        source = data.add(common.Source, rec.id, _obj=bibtex2source(rec))
-        if rec.id in files:
+    for rec in Database.from_file(api.bibfile, lowercase=True):
+        source = data.add(common.Source, rec.id, _obj=bibtex2source(rec, lowercase_id=True))
+        if rec.id in api.sources:
+            spec = api.sources[rec.id]
             DBSession.flush()
             DBSession.add(common.Source_files(
-                mime_type='application/pdf',
-                object_pk=source.pk,
-                jsondata=dict(url=files[rec.id])))
+                mime_type=spec['mimetype'], object_pk=source.pk, jsondata=spec))
 
     data.add(
         models.ConceptSet,
@@ -91,136 +74,119 @@ def main(args):
         name='<NA>',
         description='Set of all concepts not yet mapped to a meaningful concept set')
 
-    for concept in reader(data_path('concepticon.tsv'), namedtuples=True):
+    for concept in api.conceptsets.values():
         data.add(
             models.ConceptSet,
-            concept.ID,
-            id=concept.ID,
-            name=concept.GLOSS,
-            description=concept.DEFINITION,
-            semanticfield=concept.SEMANTICFIELD,
-            ontological_category=concept.ONTOLOGICAL_CATEGORY)
+            concept.id,
+            id=concept.id,
+            name=concept.gloss,
+            description=concept.definition,
+            semanticfield=concept.semanticfield,
+            ontological_category=concept.ontological_category)
 
-    for rel in reader(data_path('conceptrelations.tsv'), namedtuples=True):
+    for rel in api.relations.raw:
         DBSession.add(models.Relation(
-            source=data['ConceptSet'][rel.SOURCE],
-            target=data['ConceptSet'][rel.TARGET],
-            description=rel.RELATION))
+            source=data['ConceptSet'][rel['SOURCE']],
+            target=data['ConceptSet'][rel['TARGET']],
+            description=rel['RELATION']))
 
-    missing_translations = Counter()
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
 
-    for cl in reader(data_path('conceptlists.tsv'), dicts=True):
-        concepts = data_path('conceptlists', '%(ID)s.tsv' % cl)
-        if not concepts.exists():
-            continue
-        langs = [l.lower() for l in split(cl['SOURCE_LANGUAGE'])]
+    for cl in api.conceptlists.values():
         conceptlist = data.add(
             models.Conceptlist,
-            cl['ID'],
-            id=cl['ID'],
-            name=' '.join(cl['ID'].split('-')),
-            description=cl['NOTE'],
-            target_languages=cl['TARGET_LANGUAGE'],
-            source_languages=' '.join(langs),
-            year=int(cl['YEAR']) if cl['YEAR'] else None,
+            cl.id,
+            id=cl.id,
+            name=' '.join(cl.id.split('-')),
+            description=cl.note,
+            target_languages=cl.target_language,
+            source_languages=' '.join(cl.source_language),
+            year=cl.year,
         )
-        for id_ in split(cl['REFS']):
+        for id_ in cl.refs:
             common.ContributionReference(
                 source=data['Source'][id_], contribution=conceptlist)
 
-        has_tags = False
-        for tag in set(split(cl['TAGS'])):
-            has_tags = True
+        for tag in cl.tags or ['specific']:
             DBSession.add(models.ConceptlistTag(
                 conceptlist=conceptlist, tag=data['Tag'][tag]))
-        if not has_tags:
-            DBSession.add(models.ConceptlistTag(
-                conceptlist=conceptlist, tag=data['Tag']['specific']))
 
-        for i, name in enumerate(split(cl['AUTHOR'], sep=' and ')):
+        for i, name in enumerate(re.split('\s+(?:and|AND)\s+', cl.author)):
             name = strip_braces(name)
-            contrib = data['Contributor'].get(name)
+            cid = slug(name)
+            contrib = data['Contributor'].get(cid)
             if not contrib:
-                contrib = data.add(
-                    common.Contributor, name, id=slug(name), name=name)
+                contrib = data.add(common.Contributor, cid, id=cid, name=name)
             DBSession.add(common.ContributionContributor(
                 ord=i, contribution=conceptlist, contributor=contrib))
-        for k in 'ID NOTE TARGET_LANGUAGE SOURCE_LANGUAGE YEAR REFS AUTHOR'.split():
-            del cl[k]
-        DBSession.flush()
-        for k, v in cl.items():
-            if k not in ['ITEMS', 'TAGS', 'PDF'] and v and v != NA:
-                DBSession.add(common.Contribution_data(
-                    object_pk=conceptlist.pk, key=k, value=v))
+        #for k in 'ID NOTE TARGET_LANGUAGE SOURCE_LANGUAGE YEAR REFS AUTHOR'.split():
+        #    del cl[k]
+        #DBSession.flush()
+        #for k, v in cl.items():
+        #    if k not in ['ITEMS', 'TAGS', 'PDF'] and v and v != NA:
+        #        DBSession.add(common.Contribution_data(
+        #            object_pk=conceptlist.pk, key=k, value=v))
 
-        for concept in reader(concepts, namedtuples=True):
-            assert concept.ID
+        for concept in cl.concepts.values():
             lgs = {}
-            for lang in langs:
-                v = getattr(concept, lang.upper())
+            for lang in cl.source_language:
+                v = getattr(concept, lang, concept.attributes.get(lang))
                 if v:
                     if v == NA:
-                        missing_translations.update([conceptlist.id])
-                    else:
-                        lgs[lang] = v
+                        print('missing %s translation in %s' % (lang, concept.id))
+                    lgs[lang] = v
                 else:
                     raise ValueError(
                         'missing %s translation in %s' % (lang, conceptlist.id))
 
-            match = number_pattern.match(concept.NUMBER)
+            match = number_pattern.match(concept.number)
             if not match:
                 raise ValueError
-            vs = common.ValueSet(
-                id=concept.ID,
-                description=getattr(concept, 'GLOSS', getattr(concept, 'ENGLISH', None)),
-                language=english,
-                contribution=conceptlist,
-                parameter=data['ConceptSet'][concept.CONCEPTICON_ID or NA])
-            d = {}
-            for key, value in concept.__dict__.items():
-                if not key.startswith('CONCEPTICON_') and \
-                        key not in ['NUMBER', 'ID', 'GLOSS'] + [l.upper() for l in langs]:
-                    d[key.lower()] = value
+            vsid = (english.id, conceptlist.id, data['ConceptSet'][concept.concepticon_id or NA])
+            vs = data['ValueSet'].get(vsid)
+            if not vs:
+                vs = data.add(
+                    common.ValueSet,
+                    vsid,
+                    id=concept.id,
+                    description=concept.label,
+                    language=english,
+                    contribution=conceptlist,
+                    parameter=data['ConceptSet'][concept.concepticon_id or NA])
             v = models.Concept(
-                id=concept.ID,
+                id=concept.id,
                 valueset=vs,
-                description=getattr(concept, 'GLOSS', None),  # our own gloss, if available
+                description=concept.gloss,  # our own gloss, if available
                 name='; '.join('%s [%s]' % (lgs[l], l) for l in sorted(lgs.keys())),
                 number=int(match.group('number')),
                 number_suffix=match.group('suffix'),
-                jsondata=d)
+                jsondata={
+                    k: float(v) if isinstance(v, Decimal) else (v.unsplit() if hasattr(v, 'unsplit') else v)
+                    for k, v in concept.attributes.items()
+                    if k not in cl.source_language})
             DBSession.flush()
+            #
+            # TODO: map these to Gloss ínstances!
+            #
             for key, value in lgs.items():
                 DBSession.add(
                     common.Value_data(key='lang_' + key, value=value, object_pk=v.pk))
 
-    print('Missing translations:')
-    for clid, no in missing_translations.most_common():
-        print(clid, no)
-
-    for fname in data_path('concept_set_meta').iterdir():
-        if fname.suffix == '.tsv':
-            md = load(fname.parent.joinpath(fname.name + '-metadata.json'))
-            provider = models.MetaProvider(
-                id=fname.stem,
-                name=md['dc:title'],
-                description=md['dc:description'],
-                url=md['dc:source'],
-                jsondata=md)
-            for meta in reader(fname, dicts=True):
-                try:
-                    for k, v in meta.items():
-                        if v and k != 'CONCEPTICON_ID':
-                            models.ConceptSetMeta(
-                                metaprovider=provider,
-                                conceptset=data['ConceptSet'][meta['CONCEPTICON_ID']],
-                                key=k,
-                                value=v)
-                except:
-                    print(fname)
-                    print(meta)
-                    raise
+    for md in api.metadata.values():
+        provider = models.MetaProvider(
+            id=md.id,
+            name=md.meta['dc:title'],
+            description=md.meta['dc:description'],
+            url=md.meta['dc:source'],
+            jsondata=md.meta)
+        for meta in md.values.values():
+            for k, v in meta.items():
+                if v and k != 'CONCEPTICON_ID':
+                    models.ConceptSetMeta(
+                        metaprovider=provider,
+                        conceptset=data['ConceptSet'][meta['CONCEPTICON_ID']],
+                        key=k,
+                        value=v)
 
 
 def similarity(cl1, cl2):

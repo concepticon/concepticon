@@ -19,7 +19,7 @@ JSON_DESC = """
 Description
 -----------
 
-The file conceptset.json conains information about concept sets labels and alternative
+The file conceptset.json contains information about concept sets labels and alternative
 labels used in concept lists in the following format:
 
 ```

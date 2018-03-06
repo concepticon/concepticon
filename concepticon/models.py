@@ -15,7 +15,9 @@ from uritemplate import expand, variables
 
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
-from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin
+from clld.db.models.common import (
+    Contribution, Parameter, Value, IdNameDescriptionMixin, Unit,
+)
 from clld.lib.rdf import url_for_qname, NAMESPACES
 from clldutils.misc import cached_property
 
@@ -32,6 +34,13 @@ class Concept(CustomModelMixin, Value):
     def __rdf__(self, request):
         yield 'rdf:type', url_for_qname('skos:Concept')
         yield 'skos:topConceptOf', request.resource_url(self.valueset.contribution)
+
+
+@implementer(interfaces.IUnit)
+class Gloss(CustomModelMixin, Unit):
+    pk = Column(Integer, ForeignKey('unit.pk'), primary_key=True)
+    concept_pk = Column(Integer, ForeignKey('concept.pk'))
+    concept = relationship(Concept, backref=backref('glosses'))
 
 
 @implementer(interfaces.IParameter)

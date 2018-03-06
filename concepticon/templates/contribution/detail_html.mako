@@ -5,50 +5,42 @@
 <%def name="sidebar()">
     <%util:well>
         <h4>${_('Contributors')}</h4>
-            <ul class="unstyled">
+        <ul class="unstyled">
             % for c in ctx.primary_contributors:
-            <li>
-                ${h.link(request, c)}
-            </li>
+                <li>${h.link(request, c)}</li>
             % endfor
         </ul>
-            <h4>Tags</h4>
-            <ul class="inline">
+        <h4>Tags</h4>
+        <ul class="inline">
             % for tag in ctx.tags:
-            <li>
-                <span class="hint--left label label-success" data-hint="${tag.description}">${tag.name}</span>
-            </li>
+                <li><span class="hint--left label label-success" data-hint="${tag.description}">${tag.name}</span></li>
             % endfor
         </ul>
         <h4>Source</h4>
         <ul class="unstyled">
             % for ref in ctx.references:
-            <li>
-                ${h.link(request, ref.source)}
-                % if 'PAGES' in ctx.datadict():
-                    (${ctx.datadict()['PAGES']})
-                % endif
-                % if ref.source.files:
-                    [${h.external_link(ref.source._files[0].jsondata['url'], label='PDF')}]
-                % endif
-            </li>
+                <li>
+                    ${h.link(request, ref.source)}
+                    % if 'PAGES' in ctx.datadict():
+                        (${ctx.datadict()['PAGES']})
+                    % endif
+                    % if ref.source.files:
+                        ${u.cdstar.link(ref.source._files[0])}
+                    % endif
+                </li>
             % endfor
         </ul>
         % if 'URL' in ctx.datadict():
             ${h.external_link(ctx.datadict()['URL'])}
         % endif
         <h4>Target languages</h4>
-            <p>${ctx.target_languages}</p>
-        <h4>Note</h4>
-        <p>
-            ${u.link_conceptlists(request, ctx.description)|n}
-        </p>
-            <h4>Most similar concept lists</h4>
-            <table class="table table-condensed table-nonfluid">
-                <thead>
-                    <tr><th>Concept list</th><th>Similarity score</th></tr>
-                </thead>
-                <tbody>
+        <p>${ctx.target_languages}</p>
+        <h4>Most similar concept lists</h4>
+        <table class="table table-condensed table-nonfluid">
+            <thead>
+                <tr><th>Concept list</th><th>Similarity score</th></tr>
+            </thead>
+            <tbody>
                 <% rsc = [r for r in h.RESOURCES if r.name == 'contribution'][0] %>
                 % for clid, score in ctx.jsondata['most_similar']:
                 <tr>
@@ -56,8 +48,8 @@
                     <td>${'{0:.2}'.format(score)}</td>
                 </tr>
                 % endfor
-                </tbody>
-            </table>
+            </tbody>
+        </table>
         % if ctx.data:
             <dl>
                 % for d in [_d for _d in ctx.data if _d.value and _d.key not in ['PAGES', 'URL']]:
@@ -70,5 +62,6 @@
 </%def>
 
 <h2>${_('Contribution')} ${ctx.name}</h2>
+${u.link_conceptlists(request, ctx.description)|n}
 
 ${request.get_datatable('values', h.models.Value, contribution=ctx).render()}

@@ -4,7 +4,9 @@ Releasing clld/concepticon
 
 - update clld/concepticon-data
 - recreate the database
-- Update DOI badge on start page
+- Update landing page:
+  - DOI badge
+  - release number and github link
 - Create downloads:
 ```
 $ clld-create-downloads development.ini 

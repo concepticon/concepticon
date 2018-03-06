@@ -13,6 +13,7 @@ from markdown import markdown
 from clld.web.util.helpers import get_referents, external_link
 from clld.web.util.htmllib import HTML
 from clld.db.models.common import Contribution, Source
+from clldmpg import cdstar
 
 
 REF_PATTERN = re.compile(':ref:(?P<id>[^\)]+)')
