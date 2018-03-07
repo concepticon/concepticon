@@ -9,12 +9,17 @@ Releasing clld/concepticon
   - release number and github link
 - Create downloads:
 ```
-$ clld-create-downloads development.ini 
+clld-create-downloads development.ini 
+```
+
+- Upload the downloads to CDSTAR:
+```
+clldmpg --version=<version> dl2cdstar
 ```
 
 - Make sure the tests pass
 ```
-$ tox
+tox
   ...
   py34: commands succeeded
   py27: commands succeeded
@@ -22,13 +27,12 @@ $ tox
 ```
 
 - Commit and push all changes
+```
+git commit -a -m"release <version>"
+```
+
 - Create a release of clld/concepticon with the same version number as the data release.
 - Deploy to http://concepticon.clld.org
 ```
-$ fab tasks.deploy:production
-```
-
-- Copy downloads
-```
-$ fab tasks.copy_downloads:production
+(appconfig)$ fab deploy:production
 ```

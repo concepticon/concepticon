@@ -49,14 +49,10 @@ def main(args):
             'license_icon': 'cc-by.png',
             'license_name': 'Creative Commons Attribution 4.0 International License'})
     DBSession.add(dataset)
-    for i, name in enumerate([
-        'Johann-Mattis List',
-        'Michael Cysouw',
-        'Simon Greenhill',
-        'Robert Forkel',
-    ]):
-        c = common.Contributor(id=slug(name), name=name)
-        dataset.editors.append(common.Editor(contributor=c, ord=i))
+    for i, ed in enumerate(api.editors):
+        if not ed.end:
+            c = common.Contributor(id=slug(ed.name), name=ed.name)
+            dataset.editors.append(common.Editor(contributor=c, ord=i))
 
     TAGS = {k: v for k, v in load(api.data_path('concepticon.json'))['TAGS'].items()}
 

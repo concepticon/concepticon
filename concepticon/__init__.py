@@ -1,5 +1,7 @@
 from pyramid.config import Configurator
 
+from clld.interfaces import IDownload
+
 # we must make sure custom models are known at database initialization!
 from concepticon import models
 from concepticon.views import search_concept
@@ -21,6 +23,8 @@ def main(global_config, **settings):
     """
     config = Configurator(settings=settings)
     config.include('clldmpg')
+    cldf = config.registry.queryUtility(IDownload, name='dataset.cldf')
+    assert config.registry.unregisterUtility(cldf, name='dataset.cldf')
     config.add_route('search_concept', '/search_concept')
     config.add_route('relations', '/relations')
     return config.make_wsgi_app()

@@ -27,7 +27,7 @@
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
         <p>
-            <a href="http://dx.doi.org/10.5281/zenodo.51259"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.51259.svg" alt="10.5281/zenodo.51259"></a>
+            <a href="https://doi.org/10.5281/zenodo.1193579" title="10.5281/zenodo.1193579"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1193579.svg" alt="DOI"></a>
         </p>
         ${h.cite_button(request, ctx)}
     </%util:well>
@@ -55,7 +55,7 @@
 <h3>A Resource for the Linking of Concept Lists</h3>
 <div class="row-fluid">
   <div class="span5">
-    <p class="lead">
+    <p>
     This resource, our Concepticon, links <a
 	    href="${request.route_url('values')}">concept labels</a> from
     different <a href="{request.route_url('contributions')}">conceptlists</a>
@@ -70,13 +70,14 @@
     allows researchers a quick access to studies on semantic change,
     cross-linguistic polysemies, and semantic associations.
     </p>
+      <p>
+          If you want to learn more about the ideas behind our Concepticon, have a look at our
+          <a href="${request.route_url('about')}">about</a> page or read
+          <a href="${request.route_url('source', id='list2016a')}">List et al. 2016, presented at LREC</a>.
+      </p>
   </div>
   <div id="container" class="span6"></div>
 </div>
-<div class="row-fluid">
-<p class="lead">
-    If you want to learn more about the ideas behind our Concepticon, have a look at our <a href="${request.route_url('about')}">about</a> page.
-</p></div>
 
 
 
