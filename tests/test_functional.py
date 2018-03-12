@@ -6,7 +6,6 @@ pytest_plugins = ['clld']
 @pytest.mark.parametrize(
     "method,path",
     [
-        ('get_html', '/'),
         ('get_json', '/relations'),
         ('get_html', '/parameters/1'),
         ('get_xml', '/parameters/1.rdf'),
@@ -29,6 +28,10 @@ pytest_plugins = ['clld']
     ])
 def test_pages(app, method, path):
     getattr(app, method)(path)
+
+
+def test_misc(app):
+    assert 'request.route' not in app.get_html('/')
 
 
 def test_error(app):

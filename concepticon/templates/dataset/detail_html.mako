@@ -58,7 +58,7 @@
     <p>
     This resource, our Concepticon, links <a
 	    href="${request.route_url('values')}">concept labels</a> from
-    different <a href="{request.route_url('contributions')}">conceptlists</a>
+    different <a href="${request.route_url('contributions')}">conceptlists</a>
     to <a href="${request.route_url('parameters')}">concept sets</a>.  Each
     concept set is given a unique identifier, a unique label, and a
     human-readable definition. Concept sets are further structured by defining
