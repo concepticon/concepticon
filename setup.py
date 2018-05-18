@@ -20,8 +20,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clld>=4.1.1',
-        'clldmpg~=3.1',
+        'clld>=4.2.2',
+        'clldmpg>=3.3.1',
         'markdown',
         'uritemplate',
         'pyconcepticon',
@@ -31,11 +31,11 @@ setup(
     extras_require={
         'dev': [
             'flake8',
-            'psycopg2',
             'tox',
         ],
         'test': [
             'mock',
+            'psycopg2',
             'pytest>=3.1',
             'pytest-clld',
             'pytest-mock',
