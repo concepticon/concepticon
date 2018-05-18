@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 data
+geckodriver.log
 
 # C extensions
 *.so
@@ -34,6 +35,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+.pytest_cache
 htmlcov/
 .tox/
 .coverage
