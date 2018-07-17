@@ -197,7 +197,10 @@ def similarity(cl1, cl2):
 
 
 def uniqueness(cl):
-    return sum([1 / len(c.parameter.valuesets) for c in cl.valuesets]) / len(cl.valuesets)
+    try:
+        return sum([1 / len(c.parameter.valuesets) for c in cl.valuesets]) / len(cl.valuesets)
+    except ZeroDivisionError:
+        return 0
 
 
 def prime_cache(args):

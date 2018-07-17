@@ -67,7 +67,7 @@ class ConceptSetLabels(Download):
                     '=' * (len(req.dataset.name) + len(' data download')),
                     req.dataset.license,
                     TxtCitation(None).render(req.dataset, req)).encode('utf8') +
-                JSON_DESC)
+                JSON_DESC.encode('utf8'))
         if p.exists():  # pragma: no cover
             remove(p)
         move(tmp, p)

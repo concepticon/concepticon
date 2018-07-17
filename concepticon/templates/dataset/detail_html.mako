@@ -27,7 +27,7 @@
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
         <p>
-            <a href="https://doi.org/10.5281/zenodo.1193579" title="10.5281/zenodo.1193579"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1193579.svg" alt="DOI"></a>
+            <a href="https://doi.org/10.5281/zenodo.1313461" title="10.5281/zenodo.1313461"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1313461.svg" alt="DOI"></a>
         </p>
         ${h.cite_button(request, ctx)}
     </%util:well>
@@ -38,7 +38,7 @@
         of data curated at
         ${h.external_link('https://github.com/clld/concepticon-data', label='clld/concepticon-data')} -
         currently the
-        ${h.external_link('https://github.com/clld/concepticon-data/releases/tag/v1.1.0', label='release 1.1.0')}
+        ${h.external_link('https://github.com/clld/concepticon-data/releases/tag/v1.2.0', label='release 1.2.0')}
     </%util:well>
 </%def>
 

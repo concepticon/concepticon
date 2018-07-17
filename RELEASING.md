@@ -21,8 +21,7 @@ clldmpg --version=<version> dl2cdstar
 ```
 tox
   ...
-  py34: commands succeeded
-  py27: commands succeeded
+  py35: commands succeeded
   congratulations :)
 ```
 
