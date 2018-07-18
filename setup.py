@@ -24,7 +24,7 @@ setup(
         'clldmpg>=3.3.1',
         'markdown',
         'uritemplate',
-        'pyconcepticon',
+        'pyconcepticon>=1.4',
         'sqlalchemy',
         'waitress',
     ],

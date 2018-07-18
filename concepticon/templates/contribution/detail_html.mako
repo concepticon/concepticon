@@ -62,6 +62,6 @@
 </%def>
 
 <h2>${_('Contribution')} ${ctx.name}</h2>
-${u.link_conceptlists(request, ctx.description)|n}
+<div>${ctx.description|n}</div>
 
 ${request.get_datatable('values', h.models.Value, contribution=ctx).render()}

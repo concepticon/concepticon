@@ -4,6 +4,7 @@ import sys
 import re
 from collections import Counter
 from decimal import Decimal
+from _functools import partial
 
 from clld.scripts.util import initializedb, Data, bibtex2source
 from clld.db.meta import DBSession
@@ -12,6 +13,8 @@ from clld.lib.bibtex import Database
 from clldutils.misc import slug
 from clldutils.jsonlib import load
 from pyconcepticon.api import Concepticon
+from pyconcepticon.util import BIB_PATTERN
+from markdown import markdown
 
 import concepticon
 from concepticon import models
@@ -202,6 +205,25 @@ def uniqueness(cl):
     except ZeroDivisionError:
         return 0
 
+REF_PATTERN = re.compile(':ref:(?P<id>[^\)]+)')
+
+
+def link_conceptlists(req, s):
+    if not s:
+        return ''  # pragma: no cover
+
+    def repl(cls, m, lower=False):
+        id_ = m.group('id')
+        if lower:
+            id_ = id_.lower()
+        obj = cls.get(id_, default=None)
+        return req.resource_url(obj) if obj else m.group('id')
+
+    return markdown(
+        BIB_PATTERN.sub(
+            partial(repl, common.Source, lower=True),
+            REF_PATTERN.sub(partial(repl, common.Contribution), s)))
+
 
 def prime_cache(args):
     """If data needs to be denormalized for lookup, do that here.
@@ -214,6 +236,7 @@ def prime_cache(args):
     for clist in DBSession.query(models.Conceptlist):
         clist.items = len(clist.valuesets)
         clist.uniqueness = uniqueness(clist)
+        clist.description = link_conceptlists(args.env['request'], clist.description)
 
         similar = Counter()
         for other in DBSession.query(models.Conceptlist):
@@ -224,5 +247,5 @@ def prime_cache(args):
 
 
 if __name__ == '__main__':
-    initializedb(create=main, prime_cache=prime_cache)
+    initializedb(create=main, prime_cache=prime_cache, bootstrap=True)
     sys.exit(0)
