@@ -10,6 +10,7 @@ from itertools import groupby
 from clld.web.util.helpers import get_referents, external_link
 from clld.web.util.htmllib import HTML
 from clld.db.models.common import Source
+from clldmpg import cdstar
 
 
 def render_kv(meta):
