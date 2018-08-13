@@ -1,3 +1,3 @@
-<p>
-    ${u.link_conceptlists(request, ctx.description)|n}
-</p>
+<div>
+    ${ctx.description|n}
+</div>
