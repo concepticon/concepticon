@@ -192,6 +192,14 @@ def main(args):
                         key=k,
                         value=v)
 
+    for obj_type, retirements in load(api.path('concepticondata', 'retired.json')).items():
+        model = {
+            'Concept': common.Value,
+            'ConceptList': common.Contribution,
+        }[obj_type]
+        for spec in retirements:
+            common.Config.add_replacement(spec['id'], spec['replacement'], model=model)
+
 
 def similarity(cl1, cl2):
     cs1 = set(c.parameter_pk for c in cl1.valuesets)
