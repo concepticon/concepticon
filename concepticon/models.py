@@ -19,7 +19,7 @@ from clld.db.models.common import (
     Contribution, Parameter, Value, IdNameDescriptionMixin, Unit,
 )
 from clld.lib.rdf import url_for_qname, NAMESPACES
-from clldutils.misc import cached_property
+from clldutils.misc import lazyproperty
 
 
 # -----------------------------------------------------------------------------
@@ -97,17 +97,17 @@ class ConceptSetMeta(Base, IdNameDescriptionMixin):
     key = Column(Unicode)
     value = Column(Unicode)
 
-    @cached_property()
+    @lazyproperty
     def schema(self):
         return self.metaprovider.schema[self.key]
 
-    @cached_property()
+    @lazyproperty
     def propertyUrl(self):
         url = self.schema.get('propertyUrl')
         if url and ':' in url and url.split(':', 1)[0] in NAMESPACES:
             return url
 
-    @cached_property()
+    @lazyproperty
     def valueUrl(self):
         url = self.schema.get('valueUrl')
         if url and variables(url) == {self.key}:
@@ -135,6 +135,7 @@ class Conceptlist(CustomModelMixin, Contribution):
     items = Column(Integer)
     uniqueness = Column(Float)
     year = Column(Integer)
+    alias = Column(Unicode)
 
     def __rdf__(self, request):
         yield 'rdf:type', url_for_qname('skos:ConceptScheme')

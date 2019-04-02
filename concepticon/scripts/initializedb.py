@@ -106,6 +106,7 @@ def main(args):
             target_languages=cl.target_language,
             source_languages=' '.join(cl.source_language),
             year=cl.year,
+            alias=', '.join(cl.alias),
         )
         for id_ in cl.refs:
             common.ContributionReference(
@@ -192,7 +193,7 @@ def main(args):
                         key=k,
                         value=v)
 
-    for obj_type, retirements in load(api.path('concepticondata', 'retired.json')).items():
+    for obj_type, retirements in api.retirements.items():
         model = {
             'Concept': common.Value,
             'ConceptList': common.Contribution,

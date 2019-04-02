@@ -2,10 +2,20 @@
 Releasing clld/concepticon
 ==========================
 
-- update clld/concepticon-data
-- recreate the database
+- update the clone of concepticon/concepticon-data:
+```bash
+cd ../concepticon-data
+git checkout vX.Y
+```
+- recreate the database. This assumes a soft link `data/concepticon-data`.
+```bash
+dropdb concepticon
+createdb concepticon
+python concepticon/scripts/initializedb.py development.ini
+```
+
 - Update landing page:
-  - DOI badge
+  - DOI badge for concepticon/concepticon-data
   - release number and github link
 - Create downloads:
 ```
