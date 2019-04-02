@@ -45,7 +45,7 @@
     If no suitably defined concept set exists, we simply
     add a new one. The combined list of all
     <a href="${request.route_url('parameters')}">concept sets</a> is our "Concepticon" in the sense of 
-    <a href="http://bibliography.lingpy.org?key=Poornima2010">Poornima and Good (2010)</a>.
+    ${h.external_link("http://bibliography.lingpy.org?key=Poornima2010", label='Poornima and Good (2010)')}.
 </p>
 <p>
     To each concept set, we add a rough <em>gloss</em>, but this is not
@@ -55,11 +55,16 @@
     taking definitions from different sources, but also by adding them
     ourselves, if no valid definition is available.  For convenience, we also
     include <em>semantic fields</em> from the World Loanword Database (extended
-    by us for new meanings that are not included there) and <em>ontological categories</em>. 
-    The ontological categories are not supposed to be
-    cross-linguistically comparable, but only a help to better identify the
-    meaning, and as a way to order the different meanings. 
-    For many concepts, additional meta-data, including links to <a href="http://babelnet.org">BabelNet</a> and <a href="http://www.omegawiki.org">OmegaWiki</a>, are offered, will be expanded in future versions.
+    by us for new meanings that are not included there) and <em>ontological categories</em>.
+
+    The ontological categories are mostly added for practical reasons of
+    allowing us to order and link the concepts more quickly. They should not
+    be taken as a serious semantic classification of the concept lists.
+
+    For many concepts, additional meta-data, including links to
+    ${h.external_link("https://babelnet.org", label="BabelNet")} and
+    ${h.external_link("http://www.omegawiki.org", label="OmegaWiki")},
+    are offered, will be expanded in future versions.
 </p>
 
 <h3>Contributing</h3>
