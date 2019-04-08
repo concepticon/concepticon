@@ -17,6 +17,7 @@ python concepticon/scripts/initializedb.py development.ini
 - Update landing page:
   - DOI badge for concepticon/concepticon-data
   - release number and github link
+  - Update about.mako with the content of concepticon-data/CONTRIBUTORS.md
 - Create downloads:
 ```
 clld-create-downloads development.ini 

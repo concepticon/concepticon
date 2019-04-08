@@ -32,6 +32,8 @@ def test_pages(app, method, path):
 
 def test_misc(app):
     assert 'request.route' not in app.get_html('/')
+    app.get('/contributions/Bennet-1976-100', status=301)
+    app.get('/values/Bennet-1976-100-1', status=301)
 
 
 def test_error(app):

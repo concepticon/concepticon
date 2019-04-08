@@ -1,5 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, division
 import sys
 import re
 from collections import Counter
@@ -35,7 +33,7 @@ def strip_braces(s):
     return s.strip()
 
 
-def main(args):
+def main(args):  # pragma: no cover
     data = Data()
 
     api = Concepticon(args.data_file('concepticon-data'))
@@ -187,16 +185,20 @@ def main(args):
         for meta in md.values.values():
             for k, v in meta.items():
                 if v and k != 'CONCEPTICON_ID':
-                    models.ConceptSetMeta(
-                        metaprovider=provider,
-                        conceptset=data['ConceptSet'][meta['CONCEPTICON_ID']],
-                        key=k,
-                        value=v)
+                    if meta['CONCEPTICON_ID'] not in data['ConceptSet']:
+                        print(md.meta['dc:title'])
+                        print(meta)
+                    else:
+                        models.ConceptSetMeta(
+                            metaprovider=provider,
+                            conceptset=data['ConceptSet'][meta['CONCEPTICON_ID']],
+                            key=k,
+                            value=v)
 
     for obj_type, retirements in api.retirements.items():
         model = {
             'Concept': common.Value,
-            'ConceptList': common.Contribution,
+            'Conceptlist': common.Contribution,
         }[obj_type]
         for spec in retirements:
             common.Config.add_replacement(spec['id'], spec['replacement'], model=model)
@@ -234,7 +236,7 @@ def link_conceptlists(req, s):
             REF_PATTERN.sub(partial(repl, common.Contribution), s)))
 
 
-def prime_cache(args):
+def prime_cache(args):  # pragma: no cover
     """If data needs to be denormalized for lookup, do that here.
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
