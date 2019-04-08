@@ -70,7 +70,7 @@
 <h3>Contributing</h3>
 <p>
     Our Concepticon is an ongoing community effort. Read our
-    ${h.external_link('https://github.com/clld/concepticon-data/blob/master/CONTRIBUTING.md', label='contribution guidelines')}
+    ${h.external_link('https://github.com/concepticon/concepticon-data/blob/master/CONTRIBUTING.md', label='contribution guidelines')}
     to find out how to become involved.
 </p>
 
