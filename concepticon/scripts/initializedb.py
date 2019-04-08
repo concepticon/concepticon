@@ -10,6 +10,7 @@ from clld.db.models import common
 from clld.lib.bibtex import Database
 from clldutils.misc import slug
 from clldutils.jsonlib import load
+from clldutils.path import git_describe
 from pyconcepticon.api import Concepticon
 from pyconcepticon.util import BIB_PATTERN
 from markdown import markdown
@@ -54,9 +55,12 @@ def main(args):  # pragma: no cover
     data = Data()
 
     api = Concepticon(args.data_file('concepticon-data'))
+    version = re.match('v(?P<number>[0-9]+\.[0-9]+(\.[0-9]+)?)$', git_describe(api.repos))
+    if not version:
+        raise ValueError('invalid checkout: {0} at {1}'.format(git_describe(api.repos), api.repos))
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="Concepticon",
+        name="Concepticon {0}".format(version.group('number')),
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
         publisher_url="http://www.shh.mpg.de",
@@ -64,6 +68,7 @@ def main(args):  # pragma: no cover
         contact='concepticon@shh.mpg.de',
         domain='concepticon.clld.org',
         jsondata={
+            'version': version.group('number'),
             'funding': html_info(api.path('CONTRIBUTORS.md'), 'Grant information'),
             'people': html_info(api.path('CONTRIBUTORS.md'), 'People'),
             'license_icon': 'cc-by.png',

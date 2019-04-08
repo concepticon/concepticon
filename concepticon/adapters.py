@@ -1,5 +1,3 @@
-# coding: utf8
-from __future__ import unicode_literals
 from collections import OrderedDict
 from zipfile import ZIP_DEFLATED, ZipFile
 from json import dumps
@@ -12,7 +10,7 @@ from clld.db.models.common import Parameter, ValueSet, Value
 from clld.web.adapters.download import Download, README
 from clld.web.adapters.md import TxtCitation
 
-from concepticon.models import ConceptSet
+from concepticon.models import ConceptSet, Concept
 
 
 JSON_DESC = """
@@ -76,14 +74,14 @@ class ConceptSetLabels(Download):
 def create():
     res = dict(conceptset_labels=OrderedDict(), alternative_labels=OrderedDict())
     for cs in DBSession.query(Parameter) \
-            .options(joinedload_all(Parameter.valuesets, ValueSet.values, Value.data)) \
+            .options(joinedload_all(Parameter.valuesets, ValueSet.values, Concept.glosses)) \
             .order_by(Parameter.name):
         if int(cs.id):
             res['conceptset_labels'][cs.name.lower()] = (cs.id, cs.name)
             for vs in cs.valuesets:
                 for value in vs.values:
-                    for k, v in value.datadict().items():
-                        if k == 'lang_english':
+                    for k, v in value.glossdict.items():
+                        if k == 'english':
                             res['alternative_labels'][v.lower()] = (cs.id, cs.name)
     return res
 

@@ -1,5 +1,6 @@
 <%inherit file="../home_comp.mako"/>
 <%namespace name="util" file="../util.mako"/>
+<%namespace name="cutil" file="../concepticon_util.mako"/>
 
 <%block name="head">
     <script src="${request.static_url('concepticon:static/sigmajs/sigma.js')}"></script>
@@ -27,19 +28,12 @@
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
         <p>
-            <a href="https://doi.org/10.5281/zenodo.1313461" title="10.5281/zenodo.1313461"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1313461.svg" alt="DOI"></a>
+            <a href="https://doi.org/10.5281/zenodo.2630577"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.2630577.svg" alt="DOI"></a>
         </p>
         ${h.cite_button(request, ctx)}
     </%util:well>
     <%util:well title="Version">
-        <a href="${req.resource_url(req.dataset)}" style="font-family: monospace">concepticon.clld.org</a>
-        serves the latest
-        ${h.external_link('https://github.com/concepticon/concepticon-data/releases', label='released version')}
-        of data curated at
-        ${h.external_link('https://github.com/concepticon/concepticon-data', label='concepticon/concepticon-data')}.
-        Released version are accessible via
-        <a href="https://doi.org/10.5281/zenodo.596412"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.596412.svg" alt="DOI"></a>
-        on ZENODO as well.
+        ${cutil.repos_info()|n}
     </%util:well>
 </%def>
 
