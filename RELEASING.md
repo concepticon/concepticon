@@ -27,10 +27,7 @@ clldmpg --version=<version> dl2cdstar
 
 - Make sure the tests pass
 ```
-tox
-  ...
-  py35: commands succeeded
-  congratulations :)
+pytest
 ```
 
 - Commit and push all changes

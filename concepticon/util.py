@@ -12,6 +12,8 @@ from clld.web.util.htmllib import HTML
 from clld.db.models.common import Source
 from clldmpg import cdstar
 
+assert cdstar
+
 
 def github_link(ctx):
     if ctx.github_url:

@@ -1,7 +1,5 @@
-from __future__ import unicode_literals
 from itertools import product
 
-from six.moves import zip
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from sqlalchemy import text
