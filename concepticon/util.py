@@ -7,10 +7,17 @@ before rendering resource's detail or index views.
 """
 from itertools import groupby
 
-from clld.web.util.helpers import get_referents, external_link
+from clld.web.util.helpers import get_referents, external_link, button, icon
 from clld.web.util.htmllib import HTML
 from clld.db.models.common import Source
 from clldmpg import cdstar
+
+
+def github_link(ctx):
+    if ctx.github_url:
+        return button(
+            icon('pencil'), title="see on GitHub", href=ctx.github_url, class_='btn-mini')
+    return ''
 
 
 def render_kv(meta):

@@ -61,7 +61,7 @@
     </%util:well>
 </%def>
 
-<h2>${_('Contribution')} ${ctx.name}</h2>
+<h2>${_('Contribution')} ${ctx.name} ${u.github_link(ctx)|n}</h2>
 <div>${ctx.description|n}</div>
 
 ${request.get_datatable('values', h.models.Value, contribution=ctx).render()}

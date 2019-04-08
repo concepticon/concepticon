@@ -158,6 +158,11 @@ class Conceptlist(CustomModelMixin, Contribution):
             yield 'dcterms:source', request.resource_url(ref.source)
 
     @property
+    def github_url(self):
+        return 'https://github.com/concepticon/concepticon-data/blob/master' \
+               '/concepticondata/conceptlists/{0}.tsv'.format(self.id)
+
+    @property
     def tags(self):
         return [ta.tag for ta in self.tag_assocs]
 
