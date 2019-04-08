@@ -57,7 +57,7 @@ def main(args):  # pragma: no cover
 
     TAGS = {k: v for k, v in load(api.data_path('concepticon.json'))['TAGS'].items()}
 
-    english = data.add(common.Language, 'eng', id='eng', name='English')
+    metalang = data.add(common.Language, 'meta', id='meta', name='Meta')
     for name, description in TAGS.items():
         data.add(models.Tag, name, id=slug(name), name=name, description=description)
 
@@ -145,7 +145,7 @@ def main(args):  # pragma: no cover
             match = number_pattern.match(concept.number)
             if not match:
                 raise ValueError
-            vsid = (english.id, conceptlist.id, data['ConceptSet'][concept.concepticon_id or NA])
+            vsid = (metalang.id, conceptlist.id, data['ConceptSet'][concept.concepticon_id or NA])
             vs = data['ValueSet'].get(vsid)
             if not vs:
                 vs = data.add(
@@ -153,7 +153,7 @@ def main(args):  # pragma: no cover
                     vsid,
                     id=concept.id,
                     description=concept.label,
-                    language=english,
+                    language=metalang,
                     contribution=conceptlist,
                     parameter=data['ConceptSet'][concept.concepticon_id or NA])
             v = models.Concept(
@@ -168,12 +168,13 @@ def main(args):  # pragma: no cover
                     for k, v in concept.attributes.items()
                     if k not in cl.source_language})
             DBSession.flush()
-            #
-            # TODO: map these to Gloss ínstances!
-            #
             for key, value in lgs.items():
-                DBSession.add(
-                    common.Value_data(key='lang_' + key, value=value, object_pk=v.pk))
+                if value != NA:
+                    lang = data['Language'].get(key)
+                    if not lang:
+                        lang = data.add(common.Language, key, id=key, name=key.capitalize())
+                    DBSession.add(models.Gloss(
+                        language=lang, lang_key=key, concept=v, name=value, id='{0}-{1}'.format(concept.id, key)))
 
     for md in api.metadata.values():
         provider = models.MetaProvider(

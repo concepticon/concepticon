@@ -16,6 +16,8 @@ _('Parameter')
 _('Parameters')
 _('Value')
 _('Values')
+_('Unit')
+_('Units')
 
 
 def main(global_config, **settings):

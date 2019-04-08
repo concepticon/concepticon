@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+import collections
 
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased, joinedload, joinedload_all
@@ -7,17 +7,18 @@ from clld.web.datatables.base import Col, LinkCol, IdCol, DetailsRowLinkCol, Int
 from clld.web.datatables.contribution import Contributions, ContributorsCol
 from clld.web.datatables.contributor import Contributors, NameCol, ContributionsCol
 from clld.web.datatables.parameter import Parameters
+from clld.web.datatables.unit import Units
 from clld.web.datatables.value import Values
 from clld.web.util.helpers import linked_references
 from clld.web.util.htmllib import HTML
 from clld.db.meta import DBSession
 from clld.db.models.common import (
     Value, Value_data, ValueSet, Parameter, Contribution, ContributionContributor,
-    ContributionReference,
+    ContributionReference, Language, Unit,
 )
 from clld.db.util import get_distinct_values, icontains
 
-from concepticon.models import ConceptSet, Concept, Conceptlist, ConceptlistTag, Tag
+from concepticon.models import ConceptSet, Concept, Conceptlist, ConceptlistTag, Tag, Gloss
 
 
 class Compilers(Contributors):
@@ -139,23 +140,23 @@ class ConceptInSourceCol(Col):
         Col.__init__(self, dt, name, **kw)
 
     def format(self, item):
-        return item.datadict().get('lang_' + self.name, '')
+        return item.glossdict.get(self.name, '')
 
     def order(self):
-        return self.alias.value
+        return self.alias.name
 
     def search(self, qs):
-        return icontains(self.alias.value, qs)
+        return icontains(self.alias.name, qs)
 
 
 class Concepts(Values):
     def __init__(self, req, *args, **kw):
         Values.__init__(self, req, *args, **kw)
-        self._langs = {}
+        self._langs = collections.OrderedDict()
         if self.contribution:
             for lang in self.contribution.source_languages.split():
                 lang = lang.lower()
-                self._langs[lang] = aliased(Value_data, name=lang)
+                self._langs[lang] = aliased(Gloss, name=lang)
 
     def base_query(self, query):
         query = Values.base_query(self, query)
@@ -164,7 +165,7 @@ class Concepts(Values):
             for lang, alias in self._langs.items():
                 query = query.outerjoin(
                     alias,
-                    and_(alias.key == 'lang_' + lang, alias.object_pk == Concept.pk))
+                    and_(alias.lang_key == lang, alias.concept_pk == Value.pk))
             query = query.options(
                 joinedload(Value.data),
                 joinedload_all(Value.valueset, ValueSet.parameter))
@@ -183,16 +184,11 @@ class Concepts(Values):
         if self.parameter:
             res.extend([
                 Col(self, 'name', sTitle='Concept in source'),
-                Col(self, 'description', sTitle='English gloss'),
                 LinkCol(self, 'conceptlist', get_object=lambda v: v.valueset.contribution),
             ])
         elif self.contribution:
-            #
-            # TODO: join Value_data for each source language!
-            #
             for lang, alias in self._langs.items():
                 res.append(ConceptInSourceCol(self, lang, alias=alias))
-            res.append(Col(self, 'description', sTitle='English gloss'))
             res.append(LinkCol(
                 self,
                 'concept_set',
@@ -201,7 +197,6 @@ class Concepts(Values):
         else:
             res.extend([
                 Col(self, 'name', sTitle='Description in source'),
-                Col(self, 'description', sTitle='English gloss'),
                 LinkCol(
                     self,
                     'concept_set',
@@ -211,8 +206,60 @@ class Concepts(Values):
         return res
 
 
+class Glosses(Units):
+    def base_query(self, query):
+        query = query.join(Language).join(Gloss.concept).options(
+            joinedload(Unit.language),
+            joinedload(Gloss.concept),
+        )
+        query = query \
+            .join(Value.valueset) \
+            .join(ValueSet.parameter) \
+            .join(ValueSet.contribution) \
+            .options(
+            joinedload(Gloss.concept, Value.valueset, ValueSet.parameter),
+            joinedload(Gloss.concept, Value.valueset, ValueSet.contribution))
+
+        if self.language:
+            query = query\
+                .join(Value.valueset)\
+                .join(ValueSet.parameter)\
+                .join(ValueSet.contribution)\
+                .options(
+                    joinedload(Gloss.concept, Value.valueset, ValueSet.parameter),
+                    joinedload(Gloss.concept, Value.valueset, ValueSet.contribution))
+            return query.filter(Unit.language == self.language)
+        return query
+
+    def col_defs(self):
+        res = [
+            Col(self, 'name', sTitle='Gloss'),
+            LinkCol(
+                self,
+                'concept_set',
+                model_col=Parameter.name,
+                get_object=lambda i: i.concept.valueset.parameter),
+            LinkCol(
+                self,
+                'concept_list',
+                model_col=Contribution.name,
+                get_object=lambda i: i.concept.valueset.contribution),
+        ]
+        if self.language:
+            return res
+        return [
+            LinkCol(
+                self,
+                'language',
+                model_col=Language.name,
+                choices=get_distinct_values(Language.name),
+                get_object=lambda i: i.language),
+        ] + res
+
+
 def includeme(config):
     config.register_datatable('parameters', ConceptSets)
     config.register_datatable('values', Concepts)
+    config.register_datatable('units', Glosses)
     config.register_datatable('contributions', Conceptlists)
     config.register_datatable('contributors', Compilers)

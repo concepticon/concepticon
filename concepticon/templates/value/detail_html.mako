@@ -2,31 +2,56 @@
 <%namespace name="util" file="../util.mako"/>
 <%! active_menu_item = "values" %>
 
+<%def name="sidebar()">
+    <%util:well>
+        <dl>
+            <dt>${_('Parameter')}:</dt>
+            <dd>${h.link(request, ctx.valueset.parameter)}</dd>
+            <dt>${_('Contribution')}:</dt>
+            <dd>${h.link(request, ctx.valueset.contribution)}</dd>
+            <dd>
+                ${ctx.valueset.contribution.description|n}
+            </dd>
+        </dl>
+    </%util:well>
+</%def>
 
-<h2>${_('Value')} ${ctx.name}</h2>
+<h2>${_('Value')} ${ctx.label}</h2>
 
-<dl>
-    % for k, v in ctx.datadict().items():
-        <dt>${k.split('_')[1].capitalize()}:</dt>
-        <dd>${v}</dd>
-    % endfor
-    % if ctx.description:
-        <dt>English gloss:</dt>
-        <dd>${ctx.description}</dd>
-    % endif
-    <dt>${_('Parameter')}:</dt>
-    <dd>${h.link(request, ctx.valueset.parameter)}</dd>
-    <dt>${_('Contribution')}:</dt>
-    <dd>${h.link(request, ctx.valueset.contribution)}</dd>
+<table class="table table-condensed table-nonfluid">
+    <thead>
+    <tr>
+        <th>Language</th>
+        <th>Gloss</th>
+    </tr>
+    </thead>
+    <tbody>
+        % for g in ctx.glosses:
+            <tr>
+                <td>${h.link(req, g.language)}</td>
+                <td>${g.name}</td>
+            </tr>
+        % endfor
+    </tbody>
+</table>
+
+% if ctx.jsondata:
+    <h3>Metadata</h3>
+    <dl class="dl-horizontal">
+        ##% if ctx.description:
+    ##    <dt>English gloss:</dt>
+    ##    <dd>${ctx.description}</dd>
+    ##% endif
     % for k, v in ctx.jsondata.items():
-    <dt>${k.capitalize()}:</dt>
-    <dd>
-       % if k == 'url':
+        <dt>${k.capitalize()}:</dt>
+        <dd>
+            % if k == 'url':
        ${h.external_link(v)}
-       % else:
+            % else:
        ${v}
-       % endif
-    </dd>
+            % endif
+        </dd>
     % endfor
-    ## TODO: relations!
+        ## TODO: relations!
 </dl>
+% endif

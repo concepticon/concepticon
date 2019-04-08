@@ -16,7 +16,7 @@ from uritemplate import expand, variables
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
 from clld.db.models.common import (
-    Contribution, Parameter, Value, IdNameDescriptionMixin, Unit,
+    Contribution, Parameter, Value, IdNameDescriptionMixin, Unit, ValueSet,
 )
 from clld.lib.rdf import url_for_qname, NAMESPACES
 from clldutils.misc import lazyproperty
@@ -31,14 +31,27 @@ class Concept(CustomModelMixin, Value):
     number = Column(Integer)
     number_suffix = Column(String)
 
+    @property
+    def label(self):
+        comps = self.name.split('; ')
+        res = comps[0]
+        if len(comps) > 1:
+            res += '…'
+        return res
+
     def __rdf__(self, request):
         yield 'rdf:type', url_for_qname('skos:Concept')
         yield 'skos:topConceptOf', request.resource_url(self.valueset.contribution)
+
+    @property
+    def glossdict(self):
+        return {gl.lang_key: gl.name for gl in self.glosses}
 
 
 @implementer(interfaces.IUnit)
 class Gloss(CustomModelMixin, Unit):
     pk = Column(Integer, ForeignKey('unit.pk'), primary_key=True)
+    lang_key = Column(Unicode)
     concept_pk = Column(Integer, ForeignKey('concept.pk'))
     concept = relationship(Concept, backref=backref('glosses'))
 
