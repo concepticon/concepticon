@@ -33,6 +33,23 @@ def strip_braces(s):
     return s.strip()
 
 
+def html_info(p, section):
+    in_section, md = False, []
+
+    for line in p.open():
+        line = line.strip()
+        if line.startswith('##'):
+            if line.endswith(section):
+                in_section = True
+            else:
+                in_section = False
+            continue
+        if in_section:
+            md.append(line)
+
+    return markdown('\n'.join(md), extensions=['markdown.extensions.tables'])
+
+
 def main(args):  # pragma: no cover
     data = Data()
 
@@ -47,6 +64,8 @@ def main(args):  # pragma: no cover
         contact='concepticon@shh.mpg.de',
         domain='concepticon.clld.org',
         jsondata={
+            'funding': html_info(api.path('CONTRIBUTORS.md'), 'Grant information'),
+            'people': html_info(api.path('CONTRIBUTORS.md'), 'People'),
             'license_icon': 'cc-by.png',
             'license_name': 'Creative Commons Attribution 4.0 International License'})
     DBSession.add(dataset)
