@@ -20,6 +20,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'clldutils>=2.7.0',
         'clld>=4.2.2',
         'clldmpg>=3.3.1',
         'markdown',

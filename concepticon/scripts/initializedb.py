@@ -10,7 +10,7 @@ from clld.db.models import common
 from clld.lib.bibtex import Database
 from clldutils.misc import slug
 from clldutils.jsonlib import load
-from clldutils.path import git_describe
+from clldutils.apilib import assert_release
 from pyconcepticon.api import Concepticon
 from pyconcepticon.util import BIB_PATTERN
 from markdown import markdown
@@ -55,12 +55,10 @@ def main(args):  # pragma: no cover
     data = Data()
 
     api = Concepticon(args.data_file('concepticon-data'))
-    version = re.match('v(?P<number>[0-9]+\.[0-9]+(\.[0-9]+)?)$', git_describe(api.repos))
-    if not version:
-        raise ValueError('invalid checkout: {0} at {1}'.format(git_describe(api.repos), api.repos))
+    version = assert_release(api.repos)
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="Concepticon {0}".format(version.group('number')),
+        name="Concepticon {0}".format(version),
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
         publisher_url="http://www.shh.mpg.de",
