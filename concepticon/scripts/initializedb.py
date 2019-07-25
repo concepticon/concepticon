@@ -18,7 +18,6 @@ from markdown import markdown
 import concepticon
 from concepticon import models
 
-
 # Missing data (in the sources) is marked using a dash. We don't import these markers in
 # the database but regard absence of data in the database as absence of data in the
 # sources.
@@ -66,7 +65,7 @@ def main(args):  # pragma: no cover
         contact='concepticon@shh.mpg.de',
         domain='concepticon.clld.org',
         jsondata={
-            'version': version.group('number'),
+            'version': version,
             'funding': html_info(api.path('CONTRIBUTORS.md'), 'Grant information'),
             'people': html_info(api.path('CONTRIBUTORS.md'), 'People'),
             'license_icon': 'cc-by.png',

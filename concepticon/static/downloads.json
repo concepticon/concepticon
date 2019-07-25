@@ -1,83 +1,101 @@
 {
     "1.1": {
         "metadata": {
-            "creator": "pycdstar",
-            "title": "concepticon 1.1 - downloads"
+            "title": "concepticon 1.1 - downloads",
+            "creator": "pycdstar"
         },
-        "oid": "EAEA0-02A7-A941-0644-0",
         "bitstreams": [
             {
-                "bitstreamid": "concepticon_conceptset.json.zip",
-                "last-modified": 1520428288433,
-                "checksum-algorithm": "MD5",
                 "checksum": "9333ea3b756281803b0c0e7e5d7bdfb4",
+                "last-modified": 1520428288433,
+                "created": 1520428288214,
                 "filesize": 124538,
                 "content-type": "application/zip",
-                "created": 1520428288214
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_conceptset.json.zip"
             }
-        ]
+        ],
+        "oid": "EAEA0-02A7-A941-0644-0"
     },
     "1.2.0": {
         "metadata": {
-            "creator": "pycdstar",
-            "title": "concepticon 1.2.0 - downloads"
+            "title": "concepticon 1.2.0 - downloads",
+            "creator": "pycdstar"
         },
-        "oid": "EAEA0-8965-C494-5DCC-0",
         "bitstreams": [
             {
-                "bitstreamid": "concepticon_conceptset.json.zip",
-                "last-modified": 1531812515999,
-                "checksum-algorithm": "MD5",
                 "checksum": "cad4da5b308a7e49d052cddb26188a98",
+                "last-modified": 1531812515999,
+                "created": 1531812515950,
                 "filesize": 127308,
                 "content-type": "application/zip",
-                "created": 1531812515950
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_conceptset.json.zip"
             }
-        ]
+        ],
+        "oid": "EAEA0-8965-C494-5DCC-0"
     },
     "1.0": {
         "metadata": {
-            "creator": "pycdstar",
-            "title": "concepticon 1.0 - downloads"
+            "title": "concepticon 1.0 - downloads",
+            "creator": "pycdstar"
         },
-        "oid": "EAEA0-2178-2FAB-2BCE-0",
         "bitstreams": [
             {
-                "bitstreamid": "concepticon_conceptset.json.zip",
-                "last-modified": 1516189151386,
-                "checksum-algorithm": "MD5",
                 "checksum": "8ee9e8875082bf06375741e4e803dbf9",
+                "last-modified": 1516189151386,
+                "created": 1516189151279,
                 "filesize": 101529,
                 "content-type": "application/zip",
-                "created": 1516189151279
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_conceptset.json.zip"
             },
             {
-                "bitstreamid": "concepticon_dataset.cldf.zip",
-                "last-modified": 1516189178126,
-                "checksum-algorithm": "MD5",
                 "checksum": "93ac2ee1d984321d6d39a996e55a07e3",
+                "last-modified": 1516189178126,
+                "created": 1516189177961,
                 "filesize": 1504354,
                 "content-type": "application/zip",
-                "created": 1516189177961
-            }
-        ]
-    },
-    "2.0": {
-        "bitstreams": [
-            {
-                "bitstreamid": "concepticon_conceptset.json.zip",
-                "last-modified": 1554736633201,
                 "checksum-algorithm": "MD5",
-                "checksum": "acaf19e0cc1a5cd06a00236a52c2a5ee",
-                "created": 1554736633188,
-                "content-type": "application/zip",
-                "filesize": 137951
+                "bitstreamid": "concepticon_dataset.cldf.zip"
             }
         ],
-        "oid": "EAEA0-B504-6A9E-5E16-0",
+        "oid": "EAEA0-2178-2FAB-2BCE-0"
+    },
+    "2.1": {
         "metadata": {
-            "creator": "pycdstar",
-            "title": "concepticon 2.0 - downloads"
-        }
+            "title": "concepticon 2.1 - downloads",
+            "creator": "pycdstar"
+        },
+        "bitstreams": [
+            {
+                "checksum": "a4e2d8e9ddf77335e2e02da4bccd095a",
+                "content-type": "application/zip",
+                "last-modified": 1564043731814,
+                "filesize": 153773,
+                "created": 1564043731803,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_conceptset.json.zip"
+            }
+        ],
+        "oid": "EAEA0-C51C-ECC0-0779-0"
+    },
+    "2.0": {
+        "metadata": {
+            "title": "concepticon 2.0 - downloads",
+            "creator": "pycdstar"
+        },
+        "bitstreams": [
+            {
+                "checksum": "acaf19e0cc1a5cd06a00236a52c2a5ee",
+                "content-type": "application/zip",
+                "last-modified": 1554736633201,
+                "filesize": 137951,
+                "created": 1554736633188,
+                "checksum-algorithm": "MD5",
+                "bitstreamid": "concepticon_conceptset.json.zip"
+            }
+        ],
+        "oid": "EAEA0-B504-6A9E-5E16-0"
     }
 }
