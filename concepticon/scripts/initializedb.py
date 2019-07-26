@@ -250,7 +250,7 @@ def link_conceptlists(req, s):
         if lower:
             id_ = id_.lower()
         obj = cls.get(id_, default=None)
-        return req.resource_url(obj) if obj else m.group('id')
+        return req.route_path(cls.__name__.lower(), id=id_) if obj else m.group('id')
 
     return markdown(
         BIB_PATTERN.sub(
