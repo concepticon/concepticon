@@ -2,41 +2,33 @@
 Releasing clld/concepticon
 ==========================
 
-- update the clone of concepticon/concepticon-data:
-```bash
-cd ../concepticon-data
-git checkout vX.Y
-```
-- recreate the database. This assumes a soft link `data/concepticon-data`.
-```bash
-dropdb concepticon
-createdb concepticon
-python concepticon/scripts/initializedb.py development.ini
-```
-
-- Update the latest DOI badge for concepticon/concepticon-data on the landing page.
-- Create downloads:
-```
-clld-create-downloads development.ini 
-```
-
-- Upload the downloads to CDSTAR:
-```
-clldmpg --version=<version> dl2cdstar
-```
+- recreate the database:
+  ```shell script
+  concepticon-app --repos-version v<VERSION> init --doi "<DOI>"
+  ```
 
 - Make sure the tests pass
-```
-pytest
-```
+  ```shell script
+  pytest
+  ```
+
+- Create downloads:
+  ```shell script
+  clld-create-downloads development.ini 
+  ```
+
+- Upload the downloads to CDSTAR:
+  ```shell script
+  clldmpg --version=<version> dl2cdstar
+  ```
 
 - Commit and push all changes
-```
-git commit -a -m"release <version>"
-```
+  ```shell script
+  git commit -a -m"release <version>"
+  ```
 
-- Create a release of clld/concepticon with the same version number as the data release.
-- Deploy to http://concepticon.clld.org
-```
-(appconfig)$ fab deploy:production
-```
+- Create a release of `clld/concepticon` with the same version number as the data release.
+- Deploy to https://concepticon.clld.org
+  ```shell script
+  (appconfig)$ fab deploy:production
+  ```

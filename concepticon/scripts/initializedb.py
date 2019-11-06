@@ -11,7 +11,6 @@ from clld.lib.bibtex import Database
 from clldutils.misc import slug
 from clldutils.jsonlib import load
 from clldutils.apilib import assert_release
-from pyconcepticon.api import Concepticon
 from pyconcepticon.util import BIB_PATTERN
 from markdown import markdown
 
@@ -53,18 +52,24 @@ def html_info(p, section):
 def main(args):  # pragma: no cover
     data = Data()
 
-    api = Concepticon(args.data_file('concepticon-data'))
-    version = assert_release(api.repos)
+    api = args.repos
+    if not args.dry_run:
+        version = assert_release(api.repos)
+        assert re.match(r'10\.5281/zenodo\.[0-9]+', args.doi or ''), 'Invalid DOI'
+        doi = args.doi
+    else:
+        version, doi = 'test', 'test'
     dataset = common.Dataset(
         id=concepticon.__name__,
         name="Concepticon {0}".format(version),
         publisher_name="Max Planck Institute for the Science of Human History",
         publisher_place="Jena",
-        publisher_url="http://www.shh.mpg.de",
-        license="http://creativecommons.org/licenses/by/4.0/",
+        publisher_url="https://www.shh.mpg.de",
+        license="https://creativecommons.org/licenses/by/4.0/",
         contact='concepticon@shh.mpg.de',
         domain='concepticon.clld.org',
         jsondata={
+            'doi': doi,
             'version': version,
             'funding': html_info(api.path('CONTRIBUTORS.md'), 'Grant information'),
             'people': html_info(api.path('CONTRIBUTORS.md'), 'People'),

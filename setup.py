@@ -20,7 +20,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clldutils>=2.7.0',
+        'clldutils>=3.3.0',
         'clld>=4.2.2',
         'clldmpg>=3.3.1',
         'markdown',
@@ -47,7 +47,12 @@ setup(
         ],
     },
     test_suite="concepticon",
-    entry_points="""\
-[paste.app_factory]
-main = concepticon:main
-""")
+    entry_points={
+        'console_scripts': [
+            'concepticon-app=concepticon.__main__:main',
+        ],
+        'paste.app_factory': [
+            'main=concepticon:main',
+        ]
+    },
+)

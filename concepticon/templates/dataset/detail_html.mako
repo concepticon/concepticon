@@ -28,7 +28,9 @@
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}
         <p>
-            <a href="https://doi.org/10.5281/zenodo.3351275"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3351275.svg" alt="DOI"></a>
+            <a href="https://doi.org/${ctx.jsondata['doi']}">
+                <img src="https://zenodo.org/badge/DOI/${ctx.jsondata['doi']}.svg" alt="DOI">
+            </a>
         </p>
         ${h.cite_button(request, ctx)}
     </%util:well>
