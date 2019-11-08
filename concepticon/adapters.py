@@ -1,12 +1,13 @@
 from collections import OrderedDict
 from zipfile import ZIP_DEFLATED, ZipFile
 from json import dumps
+from pathlib import Path
+import shutil
 
-from sqlalchemy.orm import joinedload_all
-from clldutils.path import Path, remove, move
+from sqlalchemy.orm import joinedload
 
 from clld.db.meta import DBSession
-from clld.db.models.common import Parameter, ValueSet, Value
+from clld.db.models.common import Parameter, ValueSet
 from clld.web.adapters.download import Download, README
 from clld.web.adapters.md import TxtCitation
 
@@ -67,14 +68,17 @@ class ConceptSetLabels(Download):
                     TxtCitation(None).render(req.dataset, req)).encode('utf8') +
                 JSON_DESC.encode('utf8'))
         if p.exists():  # pragma: no cover
-            remove(p)
-        move(tmp, p)
+            p.unlink()
+        shutil.move(str(tmp), str(p))
 
 
 def create():
     res = dict(conceptset_labels=OrderedDict(), alternative_labels=OrderedDict())
     for cs in DBSession.query(Parameter) \
-            .options(joinedload_all(Parameter.valuesets, ValueSet.values, Concept.glosses)) \
+            .options(
+                joinedload(Parameter.valuesets)
+                .joindeload(ValueSet.values)
+                .joinedload(Concept.glosses)) \
             .order_by(Parameter.name):
         if int(cs.id):
             res['conceptset_labels'][cs.name.lower()] = (cs.id, cs.name)

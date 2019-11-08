@@ -4,16 +4,15 @@
 import pathlib
 import subprocess
 import contextlib
+import argparse
 
 from clldutils import db
 import transaction
-from pyramid.paster import get_appsettings, bootstrap
-from sqlalchemy import engine_from_config
-from clld.db.meta import DBSession, Base
-from clld.scripts.util import ExistingConfig
+from clld.scripts.util import ExistingConfig, SessionContext, get_env_and_settings
 
 import concepticon
 from concepticon.scripts.initializedb import prime_cache, main
+from concepticon import models
 
 PROJECT_DIR = pathlib.Path(concepticon.__file__).parent.parent
 
@@ -38,27 +37,16 @@ def register(parser):
         action='store_true',
         default=False,
     )
-
-
-# FIXME: The Session class should go into clld/scripts/util!
-class Session:
-    def __init__(self, settings):
-        self.settings = settings
-        self.engine = None
-
-    def __enter__(self):
-        self.engine = engine_from_config(self.settings)
-        DBSession.configure(bind=self.engine)
-        Base.metadata.create_all(self.engine)
-        return DBSession
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.engine:
-            self.engine.dispose()
+    parser.add_argument(
+        '--test',
+        action='store_true',
+        default=False,
+        help=argparse.SUPPRESS,
+    )
 
 
 @contextlib.contextmanager
-def dryrun_ini(db_):
+def dryrun_ini(db_):  # pragma: no cover
     p = PROJECT_DIR / 'dryrun.ini'
     p.write_text("""\
 [app: main]
@@ -75,23 +63,26 @@ port = 6543
 
 
 def run(args):
-    # FIXME: there should be a clld.scripts.util.bootstrap which does both of:
-    args.env = bootstrap(args.config_uri)
-    settings = get_appsettings(args.config_uri)
+    args.env, settings = get_env_and_settings(args.config_uri)
 
     if args.dry_run:
         settings[db.DB.settings_key] += '.dryrun'
         db_cls = db.TempDB
     else:
-        db_cls = db.FreshDB
+        db_cls = db.FreshDB  # pragma: no cover
 
     with db_cls.from_settings(settings, log=args.log) as db_:
-        with Session(settings):
+        with SessionContext(settings) as sess:
             if not args.prime_cache_only:
                 with transaction.manager:
                     main(args)
             with transaction.manager:
                 prime_cache(args)
-        if args.dry_run:
+            if args.test:
+                with transaction.manager:
+                    assert len(sess().query(models.Conceptlist).all()) == 2
+        if args.dry_run and not args.test:  # pragma: no cover
             with dryrun_ini(db_) as config:
-                subprocess.check_call(['pytest', '--appini', str(config)], cwd=str(PROJECT_DIR))
+                subprocess.check_call(
+                    ['pytest', '--appini', str(config)], cwd=str(PROJECT_DIR))
+

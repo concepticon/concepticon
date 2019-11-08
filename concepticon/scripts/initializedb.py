@@ -1,10 +1,9 @@
-import sys
 import re
 from collections import Counter
 from decimal import Decimal
 from _functools import partial
 
-from clld.scripts.util import initializedb, Data, bibtex2source
+from clld.scripts.util import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.bibtex import Database
@@ -23,7 +22,7 @@ from concepticon import models
 NA = '-'
 
 
-def strip_braces(s):
+def strip_braces(s):  # pragma: no cover
     s = s.strip()
     if s.startswith('{'):
         s = s[1:]
@@ -38,10 +37,7 @@ def html_info(p, section):
     for line in p.open():
         line = line.strip()
         if line.startswith('##'):
-            if line.endswith(section):
-                in_section = True
-            else:
-                in_section = False
+            in_section = line.endswith(section)
             continue
         if in_section:
             md.append(line)
@@ -59,22 +55,23 @@ def main(args):  # pragma: no cover
         doi = args.doi
     else:
         version, doi = 'test', 'test'
+    md = api.dataset_metadata
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="Concepticon {0}".format(version),
-        publisher_name="Max Planck Institute for the Science of Human History",
-        publisher_place="Jena",
-        publisher_url="https://www.shh.mpg.de",
-        license="https://creativecommons.org/licenses/by/4.0/",
-        contact='concepticon@shh.mpg.de',
-        domain='concepticon.clld.org',
+        name="{0} {1}".format(md.title, version),
+        publisher_name=md.publisher.name,
+        publisher_place=md.publisher.place,
+        publisher_url=md.publisher.url,
+        license=md.license.url,
+        contact=md.publisher.contact,
+        domain=md.domain,
         jsondata={
             'doi': doi,
             'version': version,
             'funding': html_info(api.path('CONTRIBUTORS.md'), 'Grant information'),
             'people': html_info(api.path('CONTRIBUTORS.md'), 'People'),
-            'license_icon': 'cc-by.png',
-            'license_name': 'Creative Commons Attribution 4.0 International License'})
+            'license_icon': md.license.icon,
+            'license_name': md.license.name})
     DBSession.add(dataset)
     for i, ed in enumerate(api.editors):
         if not ed.end:
@@ -240,7 +237,7 @@ def similarity(cl1, cl2):
 def uniqueness(cl):
     try:
         return sum([1 / len(c.parameter.valuesets) for c in cl.valuesets]) / len(cl.valuesets)
-    except ZeroDivisionError:
+    except ZeroDivisionError:  # pragma: no cover
         return 0
 
 REF_PATTERN = re.compile(':ref:(?P<id>[^\)]+)')
@@ -282,8 +279,3 @@ def prime_cache(args):  # pragma: no cover
                 similar[other.id] = similarity(clist, other)
 
         clist.update_jsondata(most_similar=similar.most_common(n=5))
-
-
-if __name__ == '__main__':
-    initializedb(create=main, prime_cache=prime_cache, bootstrap=True)
-    sys.exit(0)

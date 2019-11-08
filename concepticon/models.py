@@ -15,7 +15,7 @@ from uritemplate import expand, variables
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
 from clld.db.models.common import (
-    Contribution, Parameter, Value, IdNameDescriptionMixin, Unit, ValueSet,
+    Contribution, Parameter, Value, IdNameDescriptionMixin, Unit,
 )
 from clld.lib.rdf import url_for_qname, NAMESPACES
 from clldutils.misc import lazyproperty

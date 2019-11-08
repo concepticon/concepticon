@@ -19,7 +19,7 @@ def github_link(ctx):
     if ctx.github_url:
         return button(
             icon('pencil'), title="see on GitHub", href=ctx.github_url, class_='btn-mini')
-    return ''
+    return ''  # pragma: no cover
 
 
 def render_kv(meta):

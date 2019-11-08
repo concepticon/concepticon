@@ -2,7 +2,12 @@
 Releasing clld/concepticon
 ==========================
 
-- recreate the database:
+- Make sure the database can be recreated:
+  ```shell script
+  concepticon-app init --dry-run
+  ```
+
+- Recreate the database:
   ```shell script
   concepticon-app --repos-version v<VERSION> init --doi "<DOI>"
   ```

@@ -1,7 +1,7 @@
 import collections
 
 from sqlalchemy import and_
-from sqlalchemy.orm import aliased, joinedload, joinedload_all
+from sqlalchemy.orm import aliased, joinedload
 
 from clld.web.datatables.base import Col, LinkCol, IdCol, DetailsRowLinkCol, IntegerIdCol
 from clld.web.datatables.contribution import Contributions, ContributorsCol
@@ -77,12 +77,11 @@ class Conceptlists(Contributions):
     def base_query(self, query):
         query = query.join(Conceptlist.tag_assocs, ConceptlistTag.tag).distinct()
         return query.options(
-            joinedload_all(
-                Conceptlist.tag_assocs, ConceptlistTag.tag),
-            joinedload_all(
-                Contribution.contributor_assocs, ContributionContributor.contribution),
-            joinedload_all(
-                Contribution.references, ContributionReference.source))
+            joinedload(Conceptlist.tag_assocs).joinedload(ConceptlistTag.tag),
+            joinedload(
+                Contribution.contributor_assocs).joinedload(ContributionContributor.contribution),
+            joinedload(
+                Contribution.references).joinedload(ContributionReference.source))
 
     def col_defs(self):
         return [
@@ -168,13 +167,13 @@ class Concepts(Values):
                     and_(alias.lang_key == lang, alias.concept_pk == Value.pk))
             query = query.options(
                 joinedload(Value.data),
-                joinedload_all(Value.valueset, ValueSet.parameter))
+                joinedload(Value.valueset).joinedload(ValueSet.parameter))
         elif self.parameter:
             pass
         else:
             query = query.join(ValueSet.parameter)
-            query = query.options(joinedload_all(Value.valueset,
-                ValueSet.parameter))
+            query = query.options(joinedload(
+                Value.valueset).joinedload(ValueSet.parameter))
         return query
 
     def col_defs(self):
