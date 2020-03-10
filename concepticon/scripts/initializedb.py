@@ -75,7 +75,7 @@ def main(args):  # pragma: no cover
     DBSession.add(dataset)
     for i, ed in enumerate(api.editors):
         if not ed.end:
-            c = common.Contributor(id=slug(ed.name), name=ed.name)
+            c = data.add(common.Contributor, slug(ed.name), id=slug(ed.name), name=ed.name)
             dataset.editors.append(common.Editor(contributor=c, ord=i))
 
     TAGS = {k: v for k, v in load(api.data_path('concepticon.json'))['TAGS'].items()}
@@ -269,7 +269,7 @@ def prime_cache(args):  # pragma: no cover
         concept.representation = len(concept.valuesets)
 
     for clist in DBSession.query(models.Conceptlist):
-        clist.items = len(clist.valuesets)
+        clist.items = sum(len(vs.values) for vs in clist.valuesets)
         clist.uniqueness = uniqueness(clist)
         clist.description = link_conceptlists(args.env['request'], clist.description)
 
