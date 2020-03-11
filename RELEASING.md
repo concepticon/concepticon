@@ -2,29 +2,29 @@
 Releasing clld/concepticon
 ==========================
 
-- Make sure the database can be recreated:
+- Make sure the database can be recreated (in concepticon-data/):
   ```shell script
   concepticon-app init --dry-run
   ```
 
-- Recreate the database:
+- Recreate the database (in concepticon-data/):
   ```shell script
   concepticon-app --repos-version v<VERSION> init --doi "<DOI>"
   ```
 
-- Make sure the tests pass
+- Make sure the tests pass (in clld/concepticon):
   ```shell script
   pytest
   ```
 
-- Create downloads:
+- Create downloads (in clld/concepticon):
   ```shell script
   clld-create-downloads development.ini 
   ```
 
-- Upload the downloads to CDSTAR:
+- Upload the downloads to CDSTAR (in clld/concepticon):
   ```shell script
-  clldmpg --version=<version> dl2cdstar
+  clldmpg dl2cdstar --version=<version>
   ```
 
 - Commit and push all changes
