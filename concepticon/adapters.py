@@ -77,7 +77,7 @@ def create():
     for cs in DBSession.query(Parameter) \
             .options(
                 joinedload(Parameter.valuesets)
-                .joindeload(ValueSet.values)
+                .joinedload(ValueSet.values)
                 .joinedload(Concept.glosses)) \
             .order_by(Parameter.name):
         if int(cs.id):

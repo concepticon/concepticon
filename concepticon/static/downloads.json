@@ -115,5 +115,23 @@
                 "bitstreamid": "concepticon_dataset.cldf.zip"
             }
         ]
+    },
+    "2.3.0": {
+        "bitstreams": [
+            {
+                "bitstreamid": "concepticon_conceptset.json.zip",
+                "checksum": "26fb13df1fafc9372aa3a09cb51cb87b",
+                "created": 1583935777514,
+                "checksum-algorithm": "MD5",
+                "last-modified": 1583935777527,
+                "filesize": 175691,
+                "content-type": "application/zip"
+            }
+        ],
+        "metadata": {
+            "creator": "pycdstar",
+            "title": "concepticon 2.3.0 - downloads"
+        },
+        "oid": "EAEA0-1C47-9D8C-5C3E-0"
     }
 }
