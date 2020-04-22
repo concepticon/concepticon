@@ -20,9 +20,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'clldutils>=3.3.0',
-        'clld>=5.1.1',
-        'clldmpg>=3.3.1',
+        'clldutils>=3.5',
+        'clld>=6',
+        'clldmpg>=3.5',
         'markdown',
         'uritemplate',
         'pyconcepticon>=2.5.1',

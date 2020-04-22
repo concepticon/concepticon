@@ -2,8 +2,9 @@
 Main command line interface of the concepticon web app
 """
 import sys
-from pathlib import Path
+import pathlib
 import contextlib
+
 from cldfcatalog import Config, Catalog
 from clldutils.clilib import register_subcommands, get_parser_and_subparsers, ParserError
 from clldutils.loglib import Logging
@@ -16,13 +17,13 @@ def main(args=None, catch_all=False, parsed_args=None, log=None):
     try:
         repos = Config.from_file().get_clone('concepticon')
     except KeyError:  # pragma: no cover
-        repos = Path('.')
+        repos = pathlib.Path('.')
     parser, subparsers = get_parser_and_subparsers('concepticon')
     parser.add_argument(
         '--repos',
         help="clone of concepticon/concepticon-data",
         default=repos,
-        type=Path)
+        type=pathlib.Path)
     parser.add_argument(
         '--repos-version',
         help="version of repository data. Requires a git clone!",

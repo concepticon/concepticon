@@ -1,7 +1,7 @@
 import re
-from collections import Counter
-from decimal import Decimal
-from _functools import partial
+import decimal
+import functools
+import collections
 
 from clld.scripts.util import Data, bibtex2source
 from clld.db.meta import DBSession
@@ -187,7 +187,8 @@ def main(args):  # pragma: no cover
                 number=int(match.group('number')),
                 number_suffix=match.group('suffix'),
                 jsondata={
-                    k: float(v) if isinstance(v, Decimal) else (v.unsplit() if hasattr(v, 'unsplit') else v)
+                    k: float(v) if isinstance(v, decimal.Decimal)
+                    else (v.unsplit() if hasattr(v, 'unsplit') else v)
                     for k, v in concept.attributes.items()
                     if k not in cl.source_language})
             DBSession.flush()
@@ -256,8 +257,8 @@ def link_conceptlists(req, s):
 
     return markdown(
         BIB_PATTERN.sub(
-            partial(repl, common.Source, lower=True),
-            REF_PATTERN.sub(partial(repl, common.Contribution), s)))
+            functools.partial(repl, common.Source, lower=True),
+            REF_PATTERN.sub(functools.partial(repl, common.Contribution), s)))
 
 
 def prime_cache(args):  # pragma: no cover
@@ -273,7 +274,7 @@ def prime_cache(args):  # pragma: no cover
         clist.uniqueness = uniqueness(clist)
         clist.description = link_conceptlists(args.env['request'], clist.description)
 
-        similar = Counter()
+        similar = collections.Counter()
         for other in DBSession.query(models.Conceptlist):
             if other != clist:
                 similar[other.id] = similarity(clist, other)

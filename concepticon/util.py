@@ -5,7 +5,7 @@ This module is also used to lookup custom template context providers, i.e. funct
 following a special naming convention which are called to update the template context
 before rendering resource's detail or index views.
 """
-from itertools import groupby
+import itertools
 
 from clld.web.util.helpers import get_referents, external_link, button, icon
 from clld.web.util.htmllib import HTML
@@ -31,7 +31,7 @@ def render_kv(meta):
 
 def render_metadata(ctx):
     rows = []
-    for provider, md in groupby(ctx.meta, lambda m: m.metaprovider):
+    for provider, md in itertools.groupby(ctx.meta, lambda m: m.metaprovider):
         rows.append(HTML.tr(
             HTML.th(external_link(provider.url, label=provider.name), colspan='2')))
         for meta in md:

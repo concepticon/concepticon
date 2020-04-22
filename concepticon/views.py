@@ -1,4 +1,4 @@
-from itertools import product
+import itertools
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
@@ -65,7 +65,7 @@ def relations(req):
         for node in [rel.source, rel.target]:
             nodes[node.id] = dict(id=node.id, label=node.name, size=1)
 
-    for node, (x, y) in zip(nodes.values(), product(range(5), range(5))):
+    for node, (x, y) in zip(nodes.values(), itertools.product(range(5), range(5))):
         node['x'], node['y'] = x, y
         res['nodes'].append(node)
 

@@ -1,4 +1,4 @@
-from collections import OrderedDict
+import collections
 
 from zope.interface import implementer
 from sqlalchemy import (
@@ -14,9 +14,7 @@ from uritemplate import expand, variables
 
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
-from clld.db.models.common import (
-    Contribution, Parameter, Value, IdNameDescriptionMixin, Unit,
-)
+from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin, Unit
 from clld.lib.rdf import url_for_qname, NAMESPACES
 from clldutils.misc import lazyproperty
 
@@ -91,7 +89,7 @@ class MetaProvider(Base, IdNameDescriptionMixin):
 
     @property
     def schema(self):
-        d = OrderedDict()
+        d = collections.OrderedDict()
         for c in self.jsondata['tableSchema']['columns']:
             d[c['name']] = c
         return d

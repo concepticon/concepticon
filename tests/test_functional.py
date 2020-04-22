@@ -20,6 +20,7 @@ pytest_plugins = ['clld']
         ('get_dt', '/values?iSortingCols=1&iSortCol_0=0'),
         ('get_dt', '/values?parameter=2'),
         ('get_dt', '/values?contribution=Brinton-1891-21&iSortingCols=2&iSortCol_0=0&iSortCol_1=1&sSearch_1=a'),
+        ('get_html', '/values/Matisoff-1978-200-65'),
         ('get_xml', '/values/Matisoff-1978-200-65.rdf'),
         ('get_html', '/sources/haspelmath2009'),
         ('get_dt', '/contributors'),

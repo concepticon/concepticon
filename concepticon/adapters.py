@@ -1,8 +1,8 @@
-from collections import OrderedDict
-from zipfile import ZIP_DEFLATED, ZipFile
-from json import dumps
-from pathlib import Path
+import json
 import shutil
+import pathlib
+import zipfile
+import collections
 
 from sqlalchemy.orm import joinedload
 
@@ -55,11 +55,11 @@ class ConceptSetLabels(Download):
         p = self.abspath(req)
         if not p.parent.exists():  # pragma: no cover
             p.parent.mkdir()
-        tmp = Path('%s.tmp' % p.as_posix())
+        tmp = pathlib.Path('%s.tmp' % p.as_posix())
 
-        with ZipFile(tmp.as_posix(), 'w', ZIP_DEFLATED) as zipfile:
-            zipfile.writestr(self.name, dumps(create(), indent=4))
-            zipfile.writestr(
+        with zipfile.ZipFile(tmp.as_posix(), 'w', zipfile.ZIP_DEFLATED) as zipf:
+            zipf.writestr(self.name, json.dumps(create(), indent=4))
+            zipf.writestr(
                 'README.txt',
                 README.format(
                     req.dataset.name,
@@ -73,7 +73,8 @@ class ConceptSetLabels(Download):
 
 
 def create():
-    res = dict(conceptset_labels=OrderedDict(), alternative_labels=OrderedDict())
+    res = dict(
+        conceptset_labels=collections.OrderedDict(), alternative_labels=collections.OrderedDict())
     for cs in DBSession.query(Parameter) \
             .options(
                 joinedload(Parameter.valuesets)
