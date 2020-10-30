@@ -14,7 +14,7 @@ Releasing clld/concepticon
 
 - Create downloads (in clld/concepticon):
   ```shell script
-  clld-create-downloads development.ini 
+  clld create_downloads development.ini concepticon.clld.org
   ```
 
 - Upload the downloads to CDSTAR (in clld/concepticon):
