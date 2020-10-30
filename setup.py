@@ -21,7 +21,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'clldutils>=3.5',
-        'clld>=6',
+        'clld>=7',
         'clldmpg>=3.5',
         'markdown',
         'uritemplate',
@@ -35,7 +35,6 @@ setup(
             'tox',
         ],
         'test': [
-            'mock',
             'psycopg2',
             'pytest>=3.1',
             'pytest-clld',
@@ -48,9 +47,6 @@ setup(
     },
     test_suite="concepticon",
     entry_points={
-        'console_scripts': [
-            'concepticon-app=concepticon.__main__:main',
-        ],
         'paste.app_factory': [
             'main=concepticon:main',
         ]

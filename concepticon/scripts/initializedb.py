@@ -1,9 +1,10 @@
 import re
 import decimal
+import pathlib
 import functools
 import collections
 
-from clld.scripts.util import Data, bibtex2source
+from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.bibtex import Database
@@ -12,6 +13,7 @@ from clldutils.jsonlib import load
 from clldutils.apilib import assert_release
 from pyconcepticon.util import BIB_PATTERN
 from markdown import markdown
+from pyconcepticon import Concepticon
 
 import concepticon
 from concepticon import models
@@ -48,13 +50,12 @@ def html_info(p, section):
 def main(args):  # pragma: no cover
     data = Data()
 
-    api = args.repos
-    if not args.dry_run:
-        version = assert_release(api.repos)
-        assert re.match(r'10\.5281/zenodo\.[0-9]+', args.doi or ''), 'Invalid DOI'
-        doi = args.doi
-    else:
-        version, doi = 'test', 'test'
+    repos_path = pathlib.Path(concepticon.__file__).parent.parent.parent / 'concepticon-data'
+    repos_path = pathlib.Path(input('concepticon-data [{}]:'.format(repos_path)) or repos_path)
+    api = Concepticon(repos_path)
+    version = assert_release(api.repos)
+    doi = input('DOI:')
+    assert re.match(r'10\.5281/zenodo\.[0-9]+', doi or ''), 'Invalid DOI'
     md = api.dataset_metadata
     dataset = common.Dataset(
         id=concepticon.__name__,
