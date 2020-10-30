@@ -84,5 +84,5 @@ def run(args):
         if args.dry_run and not args.test:  # pragma: no cover
             with dryrun_ini(db_) as config:
                 subprocess.check_call(
-                    ['pytest', '--appini', str(config)], cwd=str(PROJECT_DIR))
+                    ['pytest', '-m', '"not full"', '--appini', str(config)], cwd=str(PROJECT_DIR))
 
