@@ -27,8 +27,8 @@ Releasing clld/concepticon
   git commit -a -m"release <version>"
   ```
 
-- Create a release of `clld/concepticon` with the same version number as the data release.
 - Deploy to https://concepticon.clld.org
   ```shell script
   (appconfig)$ fab deploy:production
   ```
+
