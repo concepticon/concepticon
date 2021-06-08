@@ -11,6 +11,7 @@ from clld.lib.bibtex import Database
 from clldutils.misc import slug
 from clldutils.jsonlib import load
 from clldutils.apilib import assert_release
+from clldutils.clilib import confirm
 from pyconcepticon.util import BIB_PATTERN
 from markdown import markdown
 from pyconcepticon import Concepticon
@@ -53,9 +54,17 @@ def main(args):  # pragma: no cover
     repos_path = pathlib.Path(concepticon.__file__).parent.parent.parent / 'concepticon-data'
     repos_path = pathlib.Path(input('concepticon-data [{}]:'.format(repos_path)) or repos_path)
     api = Concepticon(repos_path)
-    version = assert_release(api.repos)
+    try:
+        version = assert_release(api.repos)
+    except AssertionError:
+        if not confirm('This seems to be a test run. Correct? ', default=False):
+            raise
     doi = input('DOI:')
-    assert re.match(r'10\.5281/zenodo\.[0-9]+', doi or ''), 'Invalid DOI'
+    try:
+        assert re.match(r'10\.5281/zenodo\.[0-9]+', doi or ''), 'Invalid DOI'
+    except AssertionError:
+        if not confirm('This seems to be a test run. Correct? ', default=False):
+            raise
     md = api.dataset_metadata
     dataset = common.Dataset(
         id=concepticon.__name__,
