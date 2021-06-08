@@ -18,6 +18,8 @@ from clld.db.models.common import Contribution, Parameter, Value, IdNameDescript
 from clld.lib.rdf import url_for_qname, NAMESPACES
 from clldutils.misc import lazyproperty
 
+# Maximum number of language columns to display for a conceptlist:
+MAX_LANG_COLS = 4
 
 # -----------------------------------------------------------------------------
 # specialized common mapper classes
@@ -146,6 +148,14 @@ class Conceptlist(CustomModelMixin, Contribution):
     uniqueness = Column(Float)
     year = Column(Integer)
     alias = Column(Unicode)
+
+    @property
+    def source_languages_list(self):
+        return [s.lower() for s in self.source_languages.split()]
+
+    @property
+    def excess_source_languages(self):
+        return len(self.source_languages_list) > MAX_LANG_COLS
 
     def __rdf__(self, request):
         yield 'rdf:type', url_for_qname('skos:ConceptScheme')

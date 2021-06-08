@@ -59,6 +59,7 @@ def main(args):  # pragma: no cover
     except AssertionError:
         if not confirm('This seems to be a test run. Correct? ', default=False):
             raise
+        version = 'x'
     doi = input('DOI:')
     try:
         assert re.match(r'10\.5281/zenodo\.[0-9]+', doi or ''), 'Invalid DOI'

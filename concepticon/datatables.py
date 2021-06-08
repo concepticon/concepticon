@@ -18,7 +18,9 @@ from clld.db.models.common import (
 )
 from clld.db.util import get_distinct_values, icontains
 
-from concepticon.models import ConceptSet, Concept, Conceptlist, ConceptlistTag, Tag, Gloss
+from concepticon.models import (
+    ConceptSet, Concept, Conceptlist, ConceptlistTag, Tag, Gloss, MAX_LANG_COLS,
+)
 
 
 class Compilers(Contributors):
@@ -153,9 +155,10 @@ class Concepts(Values):
         Values.__init__(self, req, *args, **kw)
         self._langs = collections.OrderedDict()
         if self.contribution:
-            for lang in self.contribution.source_languages.split():
-                lang = lang.lower()
+            for lang in self.contribution.source_languages_list:
                 self._langs[lang] = aliased(Gloss, name=lang)
+                if len(self._langs) >= MAX_LANG_COLS:
+                    break
 
     def base_query(self, query):
         query = Values.base_query(self, query)

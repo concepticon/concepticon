@@ -64,4 +64,11 @@
 <h2>${_('Contribution')} ${ctx.name} ${u.github_link(ctx)|n}</h2>
 <div>${ctx.description|n}</div>
 
+% if ctx.excess_source_languages:
+    <div class="alert alert-danger">
+        This conceptlist contains glosses in more languages than we can display. Please refer to the
+        ${h.external_link(ctx.github_url, 'data on GitHub')} for a complete list.
+    </div>
+% endif
+
 ${request.get_datatable('values', h.models.Value, contribution=ctx).render()}
