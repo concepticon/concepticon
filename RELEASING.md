@@ -25,6 +25,7 @@ Releasing clld/concepticon
 - Commit and push all changes
   ```shell script
   git commit -a -m"release <version>"
+  git push origin
   ```
 
 - Deploy to https://concepticon.clld.org
