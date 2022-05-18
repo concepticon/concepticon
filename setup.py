@@ -20,8 +20,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'clld>=9.1',
         'clldutils>=3.5',
-        'clld>=7',
         'clldmpg>=3.5',
         'markdown',
         'uritemplate',
