@@ -26,6 +26,7 @@ setup(
         'markdown',
         'uritemplate',
         'pyconcepticon>=2.5.1',
+        'cldfviz',
         'sqlalchemy',
         'waitress',
     ],

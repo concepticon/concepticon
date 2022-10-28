@@ -23,7 +23,7 @@
 
 <%def name="sidebar()">
     <div style="text-align: center; margin: 1em 5em 1em 5em;">
-        <img src="${request.static_url('concepticon:static/logo.png')}"/>
+        <img src="${request.static_url('concepticon:static/concepticon-logo.png')}"/>
     </div>
     <%util:well title="Cite">
         ${h.newline2br(h.text_citation(request, ctx))|n}

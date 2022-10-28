@@ -1,61 +1,36 @@
 import re
-import decimal
-import pathlib
-import functools
 import collections
+import urllib.parse
 
 from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib.bibtex import Database
 from clldutils.misc import slug
-from clldutils.jsonlib import load
 from clldutils.apilib import assert_release
 from clldutils.clilib import confirm
-from pyconcepticon.util import BIB_PATTERN
-from markdown import markdown
-from pyconcepticon import Concepticon
+from clldutils.markup import iter_markdown_sections, iter_markdown_tables
+from cldfviz.text import CLDFMarkdownLink
+from markdown import markdown as _markdown
+from tqdm import tqdm
 
 import concepticon
 from concepticon import models
 
-# Missing data (in the sources) is marked using a dash. We don't import these markers in
-# the database but regard absence of data in the database as absence of data in the
-# sources.
-NA = '-'
 
-
-def strip_braces(s):  # pragma: no cover
-    s = s.strip()
-    if s.startswith('{'):
-        s = s[1:]
-    if s.endswith('}'):
-        s = s[:-1]
-    return s.strip()
-
-
-def html_info(p, section):
-    in_section, md = False, []
-
-    for line in p.open():
-        line = line.strip()
-        if line.startswith('##'):
-            in_section = line.endswith(section)
-            continue
-        if in_section:
-            md.append(line)
-
-    return markdown('\n'.join(md), extensions=['markdown.extensions.tables'])
+def markdown(s):
+    return _markdown(s, extensions=['markdown.extensions.tables'])
 
 
 def main(args):  # pragma: no cover
+    ds = args.cldf
+    contributions = {
+        header.replace('#', '').strip().lower(): text for _, header, text in
+        iter_markdown_sections(ds.directory.joinpath('CONTRIBUTORS.md').read_text(encoding='utf8'))}
     data = Data()
 
-    repos_path = pathlib.Path(concepticon.__file__).parent.parent.parent / 'concepticon-data'
-    repos_path = pathlib.Path(input('concepticon-data [{}]:'.format(repos_path)) or repos_path)
-    api = Concepticon(repos_path)
     try:
-        version = assert_release(api.repos)
+        version = assert_release(ds.directory.parent)
     except AssertionError:
         if not confirm('This seems to be a test run. Correct? ', default=False):
             raise
@@ -66,178 +41,153 @@ def main(args):  # pragma: no cover
     except AssertionError:
         if not confirm('This seems to be a test run. Correct? ', default=False):
             raise
-    md = api.dataset_metadata
+
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="{0} {1}".format(md.title, version),
-        publisher_name=md.publisher.name,
-        publisher_place=md.publisher.place,
-        publisher_url=md.publisher.url,
-        license=md.license.url,
-        contact=md.publisher.contact,
-        domain=md.domain,
+        name="{0} {1}".format(ds.properties['dc:title'], version),
+        publisher_name=ds.properties["dc:publisher"]['http://xmlns.com/foaf/0.1/name'],
+        publisher_place=ds.properties["dc:publisher"]['dc:Location'],
+        publisher_url=ds.properties["dc:publisher"]['http://xmlns.com/foaf/0.1/homepage'],
+        license=ds.properties['dc:license']['url'],
+        contact=ds.properties["dc:publisher"]['http://xmlns.com/foaf/0.1/mbox'],
+        domain=urllib.parse.urlparse(ds.properties['dcat:accessURL']).netloc,
         jsondata={
             'doi': doi,
             'version': version,
-            'funding': html_info(api.path('CONTRIBUTORS.md'), 'Grant information'),
-            'people': html_info(api.path('CONTRIBUTORS.md'), 'People'),
-            'license_icon': md.license.icon,
-            'license_name': md.license.name})
+            'funding': markdown(contributions['grant information']),
+            'people': markdown(contributions['people']),
+            'license_icon': ds.properties['dc:license']['icon'],
+            'license_name': ds.properties['dc:license']['name']})
+
     DBSession.add(dataset)
-    for i, ed in enumerate(api.editors):
-        if not ed.end:
-            c = data.add(common.Contributor, slug(ed.name), id=slug(ed.name), name=ed.name)
+    editors = next(iter_markdown_tables(contributions['editors']))
+    editors = [dict(zip(editors[0], row)) for row in editors[1]]
+    for i, editor in enumerate(editors, start=1):
+        start, to_, end = editor['Period'].strip().partition('-')
+        start, end = start.strip(), end.strip()
+        if not end:
+            name = editor['Name'].strip()
+            c = data.add(common.Contributor, slug(name), id=slug(name), name=name)
             dataset.editors.append(common.Editor(contributor=c, ord=i))
 
-    TAGS = {k: v for k, v in load(api.data_path('concepticon.json'))['TAGS'].items()}
-
-    metalang = data.add(common.Language, 'meta', id='meta', name='Meta')
+    TAGS = {row['ID']: row['Description'] for row in ds['tags.csv']}
     for name, description in TAGS.items():
         data.add(models.Tag, name, id=slug(name), name=name, description=description)
 
-    for rec in Database.from_file(api.bibfile, lowercase=True):
-        source = data.add(common.Source, rec.id, _obj=bibtex2source(rec, lowercase_id=True))
-        if rec.id in api.sources:
-            spec = api.sources[rec.id]
+    pdfs = {row['ID']: row for row in ds['MediaTable']}
+    for rec in Database.from_file(ds.bibpath, lowercase=True):
+        source = data.add(common.Source, rec.id, _obj=bibtex2source(rec, lowercase_id=False))
+        if rec.id in pdfs:
+            spec = pdfs[rec.id]
             DBSession.flush()
             DBSession.add(common.Source_files(
-                mime_type=spec['mimetype'], object_pk=source.pk, jsondata=spec))
+                mime_type=spec['Media_Type'], object_pk=source.pk, jsondata=spec))
 
-    data.add(
-        models.ConceptSet,
-        NA,
-        id='0',
-        name='<NA>',
-        description='Set of all concepts not yet mapped to a meaningful concept set')
-
-    for concept in api.conceptsets.values():
+    for concept in ds['ParameterTable']:
         data.add(
             models.ConceptSet,
-            concept.id,
-            id=concept.id,
-            name=concept.gloss,
-            description=concept.definition,
-            semanticfield=concept.semanticfield,
-            ontological_category=concept.ontological_category)
+            concept['ID'],
+            id=concept['ID'],
+            name=concept['Name'],
+            description=concept['Description'],
+            semanticfield=concept['Semantic_Field'],
+            ontological_category=concept['Ontological_Category'])
 
-    for rel in api.relations.raw:
+    for rel in ds['conceptrelations.csv']:
         DBSession.add(models.Relation(
-            source=data['ConceptSet'][rel['SOURCE']],
-            target=data['ConceptSet'][rel['TARGET']],
-            description=rel['RELATION']))
+            source=data['ConceptSet'][rel['Source_ID']],
+            target=data['ConceptSet'][rel['Target_ID']],
+            description=rel['Relation_ID']))
 
-    number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
+    for lang in ds['LanguageTable']:
+        data.add(
+            common.Language,
+            lang['ID'],
+            id=lang['ID'],
+            name=lang['Name'],
+            latitude=lang['Latitude'],
+            longitude=lang['Longitude']
+        )
 
-    for cl in api.conceptlists.values():
+    def fname_to_component(ml):
+        if ml.is_cldf_link:
+            ml.url = "{}#cldf:{}".format(ml.component(cldf=ds), ml.objid)
+        return ml
+
+    for cl in ds['ContributionTable']:
         conceptlist = data.add(
             models.Conceptlist,
-            cl.id,
-            id=cl.id,
-            name=' '.join(cl.id.split('-')),
-            description=cl.note,
-            target_languages=cl.target_language,
-            source_languages=' '.join(cl.source_language),
-            year=cl.year,
-            alias=', '.join(cl.alias),
+            cl['ID'],
+            id=cl['ID'],
+            name=' '.join(cl['ID'].split('-')),
+            target_languages=cl['Target_Language'],
+            source_languages=' '.join(cl['Gloss_Language_IDs']),
+            description=CLDFMarkdownLink.replace(cl['Description'], fname_to_component),
+            year=cl['Year'],
+            alias=', '.join(cl['Alias']),
         )
-        for id_ in cl.refs:
+        for glid in cl['Gloss_Language_IDs']:
+            DBSession.add(models.ConceptlistLanguage(
+                conceptlist=conceptlist, language=data['Language'][glid]))
+        for src in cl['Source']:
             common.ContributionReference(
-                source=data['Source'][id_], contribution=conceptlist)
+                source=data['Source'][src], contribution=conceptlist)
 
-        for tag in cl.tags or ['specific']:
+        for tag in cl['Tags'] or ['specific']:
             DBSession.add(models.ConceptlistTag(
                 conceptlist=conceptlist, tag=data['Tag'][tag]))
 
-        for i, name in enumerate(re.split('\s+(?:and|AND)\s+', cl.author)):
-            name = strip_braces(name)
+        for i, name in enumerate(cl['Contributor']):
             cid = slug(name)
             contrib = data['Contributor'].get(cid)
             if not contrib:
                 contrib = data.add(common.Contributor, cid, id=cid, name=name)
             DBSession.add(common.ContributionContributor(
                 ord=i, contribution=conceptlist, contributor=contrib))
-        #for k in 'ID NOTE TARGET_LANGUAGE SOURCE_LANGUAGE YEAR REFS AUTHOR'.split():
-        #    del cl[k]
-        #DBSession.flush()
-        #for k, v in cl.items():
-        #    if k not in ['ITEMS', 'TAGS', 'PDF'] and v and v != NA:
-        #        DBSession.add(common.Contribution_data(
-        #            object_pk=conceptlist.pk, key=k, value=v))
 
-        for concept in cl.concepts.values():
-            lgs = {}
-            for lang in cl.source_language:
-                v = getattr(concept, lang, concept.attributes.get(lang))
-                if v:
-                    if v == NA:
-                        print('missing %s translation in %s' % (lang, concept.id))
-                    lgs[lang] = v
-                else:
-                    raise ValueError(
-                        'missing %s translation in %s' % (lang, conceptlist.id))
+    glosses_by_concept = collections.defaultdict(list)
+    for gloss in ds['FormTable']:
+        glosses_by_concept[gloss['Concept_ID']].append(gloss)
 
-            match = number_pattern.match(concept.number)
-            if not match:
-                raise ValueError
-            vsid = (metalang.id, conceptlist.id, data['ConceptSet'][concept.concepticon_id or NA])
-            vs = data['ValueSet'].get(vsid)
-            if not vs:
-                vs = data.add(
-                    common.ValueSet,
-                    vsid,
-                    id=concept.id,
-                    description=concept.label,
-                    language=metalang,
-                    contribution=conceptlist,
-                    parameter=data['ConceptSet'][concept.concepticon_id or NA])
-            v = models.Concept(
-                id=concept.id,
-                valueset=vs,
-                description=concept.gloss,  # our own gloss, if available
-                name='; '.join('%s [%s]' % (lgs[l], l) for l in sorted(lgs.keys())),
-                number=int(match.group('number')),
-                number_suffix=match.group('suffix'),
-                jsondata={
-                    k: float(v) if isinstance(v, decimal.Decimal)
-                    else (v.unsplit() if hasattr(v, 'unsplit') else v)
-                    for k, v in concept.attributes.items()
-                    if k not in cl.source_language})
-            DBSession.flush()
-            for key, value in lgs.items():
-                if value != NA:
-                    lang = data['Language'].get(key)
-                    if not lang:
-                        lang = data.add(common.Language, key, id=key, name=key.capitalize())
-                    DBSession.add(models.Gloss(
-                        language=lang, lang_key=key, concept=v, name=value, id='{0}-{1}'.format(concept.id, key)))
+    number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
+    metalang = common.Language(id='meta', name='Meta Language')
+    for concept in tqdm(ds['concepts.csv']):
+        glosses = glosses_by_concept[concept['ID']]
+        match = number_pattern.match(concept['Number'])
+        vsid = (concept['Conceptlist_ID'], concept['Concepticon_ID'])
+        vs = data['ValueSet'].get(vsid)
+        if not vs:
+            vs = data.add(
+                common.ValueSet,
+                vsid,
+                id='-'.join(vsid),
+                description='',
+                language=metalang,
+                contribution=data['Conceptlist'][concept['Conceptlist_ID']],
+                parameter=data['ConceptSet'][concept['Concepticon_ID']])
+        v = models.Concept(
+            id=concept['ID'],
+            valueset=vs,
+            description=concept['Name'],  # our own gloss, if available
+            name='; '.join('{} [{}]'.format(gl['Form'], gl['Language_ID']) for gl in glosses),
+            number=int(match.group('number')),
+            number_suffix=match.group('suffix'),
+            jsondata=concept['Attributes'],
+        )
+        for gloss in glosses:
+            DBSession.add(models.Gloss(
+                language=data['Language'][gloss['Language_ID']],
+                concept=v,
+                lang_key=gloss['Language_ID'],
+                name=gloss['Form'],
+                id='{0}-{1}'.format(v.id, gloss['Language_ID'])))
 
-    for md in api.metadata.values():
-        provider = models.MetaProvider(
-            id=md.id,
-            name=md.meta['dc:title'],
-            description=md.meta['dc:description'],
-            url=md.meta['dc:source'],
-            jsondata=md.meta)
-        for meta in md.values.values():
-            for k, v in meta.items():
-                if v and k != 'CONCEPTICON_ID':
-                    if meta['CONCEPTICON_ID'] not in data['ConceptSet']:
-                        print(md.meta['dc:title'])
-                        print(meta)
-                    else:
-                        models.ConceptSetMeta(
-                            metaprovider=provider,
-                            conceptset=data['ConceptSet'][meta['CONCEPTICON_ID']],
-                            key=k,
-                            value=v)
-
-    for obj_type, retirements in api.retirements.items():
+    for row in ds['retired.csv']:
         model = {
             'Concept': common.Value,
             'Conceptlist': common.Contribution,
-        }[obj_type]
-        for spec in retirements:
-            common.Config.add_replacement(spec['id'], spec['replacement'], model=model)
+        }[row['Type']]
+        common.Config.add_replacement(row['ID'], row['Replacement_ID'], model=model)
 
 
 def similarity(cl1, cl2):
@@ -252,25 +202,6 @@ def uniqueness(cl):
     except ZeroDivisionError:  # pragma: no cover
         return 0
 
-REF_PATTERN = re.compile(':ref:(?P<id>[^\)]+)')
-
-
-def link_conceptlists(req, s):
-    if not s:
-        return ''  # pragma: no cover
-
-    def repl(cls, m, lower=False):
-        id_ = m.group('id')
-        if lower:
-            id_ = id_.lower()
-        obj = cls.get(id_, default=None)
-        return req.route_path(cls.__name__.lower(), id=id_) if obj else m.group('id')
-
-    return markdown(
-        BIB_PATTERN.sub(
-            functools.partial(repl, common.Source, lower=True),
-            REF_PATTERN.sub(functools.partial(repl, common.Contribution), s)))
-
 
 def prime_cache(args):  # pragma: no cover
     """If data needs to be denormalized for lookup, do that here.
@@ -283,7 +214,7 @@ def prime_cache(args):  # pragma: no cover
     for clist in DBSession.query(models.Conceptlist):
         clist.items = sum(len(vs.values) for vs in clist.valuesets)
         clist.uniqueness = uniqueness(clist)
-        clist.description = link_conceptlists(args.env['request'], clist.description)
+        #clist.description = link_conceptlists(args.env['request'], clist.description)
 
         similar = collections.Counter()
         for other in DBSession.query(models.Conceptlist):

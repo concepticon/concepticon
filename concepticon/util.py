@@ -42,7 +42,7 @@ def render_metadata(ctx):
 
 def dataset_detail_html(request=None, context=None, **kw):
     return {
-        'Kraft1981': Source.get('kraft1981'),
+        'Kraft1981': Source.get('Kraft1981'),
     }
 
 

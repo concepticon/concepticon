@@ -44,10 +44,8 @@ class RefsCol(Col):
 class SourceLanguagesCol(Col):
     def __init__(self, dt, name, **kw):
         kw['choices'] = [
-            r[0][5:].capitalize() for r in DBSession.query(Value_data.key)
-            .filter(Value_data.key.startswith('lang_'))
-            .order_by(Value_data.key)
-            .distinct()]
+            r[0] for r in
+            DBSession.query(Language.id).filter(Language.id != 'meta').order_by(Language.id)]
         kw['bSortable'] = False
         Col.__init__(self, dt, name, **kw)
 
@@ -100,7 +98,7 @@ class Conceptlists(Contributions):
                 "How often do the concepts in the list occur in other lists?",
                 input_size='mini'),
             Col(self, 'year', model_col=Conceptlist.year, input_size='mini'),
-            SourceLanguagesCol(self, 'source_languages'),
+            SourceLanguagesCol(self, 'source_languages', sTitle='Gloss languages'),
             Col(self, 'target_languages', model_col=Conceptlist.target_languages),
             RefsCol(self, 'sources'),
         ]

@@ -26,11 +26,3 @@
 % endif
 
 ${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
-
-<%def name="sidebar()">
-    % if ctx.meta:
-        <%util:well title="Metadata">
-            ${u.render_metadata(ctx)}
-        </%util:well>
-    % endif
-</%def>
