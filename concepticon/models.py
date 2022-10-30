@@ -8,12 +8,11 @@ from sqlalchemy import (
     ForeignKey,
 )
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
-from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin, Unit
-from clld.lib.rdf import url_for_qname, NAMESPACES
+from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin, Unit, Language
+from clld.lib.rdf import url_for_qname
 
 # Maximum number of language columns to display for a conceptlist:
 MAX_LANG_COLS = 4
@@ -21,6 +20,13 @@ MAX_LANG_COLS = 4
 # -----------------------------------------------------------------------------
 # specialized common mapper classes
 # -----------------------------------------------------------------------------
+@implementer(interfaces.ILanguage)
+class GlossLanguage(CustomModelMixin, Language):
+    pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
+    count_conceptlists = Column(Integer, default=0)
+    count_concepts = Column(Integer, default=0)
+
+
 @implementer(interfaces.IValue)
 class Concept(CustomModelMixin, Value):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)

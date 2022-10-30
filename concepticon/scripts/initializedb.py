@@ -101,12 +101,14 @@ def main(args):  # pragma: no cover
 
     for lang in ds['LanguageTable']:
         data.add(
-            common.Language,
+            models.GlossLanguage,
             lang['ID'],
             id=lang['ID'],
             name=lang['Name'],
             latitude=lang['Latitude'],
-            longitude=lang['Longitude']
+            longitude=lang['Longitude'],
+            count_conceptlists=0,
+            count_concepts=0,
         )
 
     def fname_to_component(ml):
@@ -128,7 +130,8 @@ def main(args):  # pragma: no cover
         )
         for glid in cl['Gloss_Language_IDs']:
             DBSession.add(models.ConceptlistLanguage(
-                conceptlist=conceptlist, language=data['Language'][glid]))
+                conceptlist=conceptlist, language=data['GlossLanguage'][glid]))
+            data['GlossLanguage'][glid].count_conceptlists += 1
         for src in cl['Source']:
             common.ContributionReference(
                 source=data['Source'][src], contribution=conceptlist)
@@ -150,7 +153,7 @@ def main(args):  # pragma: no cover
         glosses_by_concept[gloss['Concept_ID']].append(gloss)
 
     number_pattern = re.compile('(?P<number>[0-9]+)(?P<suffix>.*)')
-    metalang = common.Language(id='meta', name='Meta Language')
+    metalang = models.GlossLanguage(id='meta', name='Meta Language')
     for concept in tqdm(ds['concepts.csv']):
         glosses = glosses_by_concept[concept['ID']]
         match = number_pattern.match(concept['Number'])
@@ -176,11 +179,12 @@ def main(args):  # pragma: no cover
         )
         for gloss in glosses:
             DBSession.add(models.Gloss(
-                language=data['Language'][gloss['Language_ID']],
+                language=data['GlossLanguage'][gloss['Language_ID']],
                 concept=v,
                 lang_key=gloss['Language_ID'],
                 name=gloss['Form'],
                 id='{0}-{1}'.format(v.id, gloss['Language_ID'])))
+            data['GlossLanguage'][gloss['Language_ID']].count_concepts += 1
 
     for row in ds['retired.csv']:
         model = {
@@ -214,7 +218,6 @@ def prime_cache(args):  # pragma: no cover
     for clist in DBSession.query(models.Conceptlist):
         clist.items = sum(len(vs.values) for vs in clist.valuesets)
         clist.uniqueness = uniqueness(clist)
-        #clist.description = link_conceptlists(args.env['request'], clist.description)
 
         similar = collections.Counter()
         for other in DBSession.query(models.Conceptlist):
