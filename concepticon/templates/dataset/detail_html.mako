@@ -68,6 +68,15 @@
     cross-linguistic polysemies, and semantic associations.
     </p>
       <p>
+          Note that the most important contribution by the Concepticon project are not the definitions
+          given for individual <a href="${request.route_url('parameters')}">concept sets</a>, but the
+          judgments which individual <a href="${request.route_url('values')}">elicitation glosses</a>
+          to assign to the same concept set. As a result, the definitions may sometimes look less than optimal.
+          We appreciate any help in improving the definitions, but we recommend users to check the list of
+          assigned elicitation glosses first, since these assignments should inform the definition, and not
+          vice versa.
+      </p>
+      <p>
           If you want to learn more about the ideas behind our Concepticon, have a look at our
           <a href="${request.route_url('about')}">about</a> page or read
           <a href="${request.route_url('source', id='list2016a')}">List et al. 2016, presented at LREC</a>.
