@@ -13,6 +13,7 @@ from clldutils.markup import iter_markdown_sections, iter_markdown_tables
 from cldfviz.text import CLDFMarkdownLink
 from markdown import markdown as _markdown
 from tqdm import tqdm
+from pycldf import Dataset
 
 import concepticon
 from concepticon import models
@@ -24,6 +25,9 @@ def markdown(s):
 
 def main(args):  # pragma: no cover
     ds = args.cldf
+    norare = Dataset.from_metadata(
+        ds.directory.parent.parent / 'norare-cldf' / 'cldf' / 'Wordlist-metadata.json')
+    norare_cs = {r['ID']: r for r in norare['ParameterTable'] if r['count_datasets']}
     contributions = {
         header.replace('#', '').strip().lower(): text for _, header, text in
         iter_markdown_sections(ds.directory.joinpath('CONTRIBUTORS.md').read_text(encoding='utf8'))}
@@ -91,7 +95,10 @@ def main(args):  # pragma: no cover
             name=concept['Name'],
             description=concept['Description'],
             semanticfield=concept['Semantic_Field'],
-            ontological_category=concept['Ontological_Category'])
+            ontological_category=concept['Ontological_Category'],
+            norare_datasets=norare_cs[concept['ID']]['count_datasets'] if concept['ID'] in norare_cs else 0,
+            norare_variables=norare_cs[concept['ID']]['count_variables'] if concept['ID'] in norare_cs else 0,
+        )
 
     for rel in ds['conceptrelations.csv']:
         DBSession.add(models.Relation(

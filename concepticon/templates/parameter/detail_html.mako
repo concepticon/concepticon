@@ -3,6 +3,20 @@
 <%! active_menu_item = "parameters" %>
 <%block name="title">${_('Parameter')} ${ctx.name}</%block>
 
+<%def name="sidebar()">
+    % if ctx.norare_datasets:
+        <%util:well>
+            <a href="https://norare.clld.org/parameters/${ctx.id}">
+                <img width="50%" src="${req.static_url('concepticon:static/norare-logo.png')}"/>
+            </a>
+            <p>
+                The <a href="https://norare.clld.org/parameters/${ctx.id}">corresponding entry in NoRaRe</a> is
+                linked to ${ctx.norare_variables} variables from ${ctx.norare_datasets} datasets.
+            </p>
+        </%util:well>
+    % endif
+</%def>
+
 <h2>${_('Parameter')} ${ctx.name}</h2>
 
 % if ctx.description:

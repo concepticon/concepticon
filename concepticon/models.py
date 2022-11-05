@@ -64,6 +64,8 @@ class ConceptSet(CustomModelMixin, Parameter):
     semanticfield = Column(Unicode)
     ontological_category = Column(Unicode)
     representation = Column(Integer)
+    norare_datasets = Column(Integer)
+    norare_variables = Column(Integer)
 
     def __rdf__(self, request):
         yield 'dcterms:type', self.ontological_category
