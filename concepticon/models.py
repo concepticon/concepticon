@@ -1,5 +1,3 @@
-import collections
-
 from zope.interface import implementer
 from sqlalchemy import (
     Column,
@@ -10,13 +8,11 @@ from sqlalchemy import (
     ForeignKey,
 )
 from sqlalchemy.orm import relationship, backref
-from uritemplate import expand, variables
 
 from clld import interfaces
 from clld.db.meta import CustomModelMixin, Base
-from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin, Unit
-from clld.lib.rdf import url_for_qname, NAMESPACES
-from clldutils.misc import lazyproperty
+from clld.db.models.common import Contribution, Parameter, Value, IdNameDescriptionMixin, Unit, Language
+from clld.lib.rdf import url_for_qname
 
 # Maximum number of language columns to display for a conceptlist:
 MAX_LANG_COLS = 4
@@ -24,6 +20,13 @@ MAX_LANG_COLS = 4
 # -----------------------------------------------------------------------------
 # specialized common mapper classes
 # -----------------------------------------------------------------------------
+@implementer(interfaces.ILanguage)
+class GlossLanguage(CustomModelMixin, Language):
+    pk = Column(Integer, ForeignKey('language.pk'), primary_key=True)
+    count_conceptlists = Column(Integer, default=0)
+    count_concepts = Column(Integer, default=0)
+
+
 @implementer(interfaces.IValue)
 class Concept(CustomModelMixin, Value):
     pk = Column(Integer, ForeignKey('value.pk'), primary_key=True)
@@ -61,6 +64,8 @@ class ConceptSet(CustomModelMixin, Parameter):
     semanticfield = Column(Unicode)
     ontological_category = Column(Unicode)
     representation = Column(Integer)
+    norare_datasets = Column(Integer)
+    norare_variables = Column(Integer)
 
     def __rdf__(self, request):
         yield 'dcterms:type', self.ontological_category
@@ -81,49 +86,6 @@ class ConceptSet(CustomModelMixin, Parameter):
                 yield 'skos:broader', request.resource_url(rel.source)
             else:
                 yield 'skos:related', request.resource_url(rel.source)
-        for meta in self.meta:
-            if meta.propertyUrl and meta.valueUrl:
-                yield meta.propertyUrl, meta.valueUrl
-
-
-class MetaProvider(Base, IdNameDescriptionMixin):
-    url = Column(String)
-
-    @property
-    def schema(self):
-        d = collections.OrderedDict()
-        for c in self.jsondata['tableSchema']['columns']:
-            d[c['name']] = c
-        return d
-
-
-class ConceptSetMeta(Base, IdNameDescriptionMixin):
-    metaprovider_pk = Column(Integer, ForeignKey('metaprovider.pk'))
-    conceptset_pk = Column(Integer, ForeignKey('conceptset.pk'))
-
-    metaprovider = relationship(MetaProvider, backref='meta')
-    conceptset = relationship(
-        ConceptSet,
-        backref=backref('meta', order_by=[metaprovider_pk]))
-
-    key = Column(Unicode)
-    value = Column(Unicode)
-
-    @lazyproperty
-    def schema(self):
-        return self.metaprovider.schema[self.key]
-
-    @lazyproperty
-    def propertyUrl(self):
-        url = self.schema.get('propertyUrl')
-        if url and ':' in url and url.split(':', 1)[0] in NAMESPACES:
-            return url
-
-    @lazyproperty
-    def valueUrl(self):
-        url = self.schema.get('valueUrl')
-        if url and variables(url) == {self.key}:
-            return expand(url, {self.key: self.value})
 
 
 class Relation(Base):
@@ -174,9 +136,15 @@ class Conceptlist(CustomModelMixin, Contribution):
         return [ta.tag for ta in self.tag_assocs]
 
 
+class ConceptlistLanguage(Base):
+    conceptlist_pk = Column(Integer, ForeignKey("conceptlist.pk"))
+    language_pk = Column(Integer, ForeignKey("language.pk"))
+    conceptlist = relationship(Conceptlist, backref="language_assocs")
+    language = relationship("Language", backref="conceptlist_assocs")
+
+
 class ConceptlistTag(Base):
     conceptlist_pk = Column(Integer, ForeignKey('conceptlist.pk'))
     tag_pk = Column(Integer, ForeignKey('tag.pk'))
-
     conceptlist = relationship(Conceptlist, backref='tag_assocs')
     tag = relationship(Tag, backref='conceptlist_assocs')

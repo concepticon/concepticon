@@ -1,6 +1,7 @@
 <%inherit file="../${context.get('request').registry.settings.get('clld.app_template', 'app.mako')}"/>
 <%namespace name="util" file="../util.mako"/>
 <%! active_menu_item = "contributions" %>
+<%! from clld_markdown_plugin import markdown %>
 
 <%def name="sidebar()">
     <%util:well>
@@ -35,6 +36,12 @@
         % endif
         <h4>Target languages</h4>
         <p>${ctx.target_languages}</p>
+        <h4>Gloss languages</h4>
+            <ul>
+                % for la in sorted(ctx.language_assocs, key=lambda a: a.language.id):
+                    <li>${h.link(req, la.language)}</li>
+                % endfor
+            </ul>
         <h4>Most similar concept lists</h4>
         <table class="table table-condensed table-nonfluid">
             <thead>
@@ -62,7 +69,8 @@
 </%def>
 
 <h2>${_('Contribution')} ${ctx.name} ${u.github_link(ctx)|n}</h2>
-<div>${ctx.description|n}</div>
+
+<div>${markdown(req, ctx.description)|n}</div>
 
 % if ctx.excess_source_languages:
     <div class="alert alert-danger">

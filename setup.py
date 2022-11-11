@@ -21,11 +21,13 @@ setup(
     zip_safe=False,
     install_requires=[
         'clld>=9.2.1',
+        'clld-markdown-plugin',
         'clldutils>=3.5',
         'clldmpg>=3.5',
         'markdown',
         'uritemplate',
         'pyconcepticon>=2.5.1',
+        'cldfviz',
         'sqlalchemy',
         'waitress',
     ],

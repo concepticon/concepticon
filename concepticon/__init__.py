@@ -25,6 +25,7 @@ def main(global_config, **settings):
     """
     config = Configurator(settings=settings)
     config.include('clldmpg')
+    config.include('clld_markdown_plugin')
     cldf = config.registry.queryUtility(IDownload, name='dataset.cldf')
     assert config.registry.unregisterUtility(cldf, name='dataset.cldf')
     config.add_route('search_concept', '/search_concept')

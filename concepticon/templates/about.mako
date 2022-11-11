@@ -25,7 +25,7 @@
     an ordering number, which we will also include. Any other information that
     we consider important will also be extracted from the sources (e.g.
     <em>semantic field</em> from the 
-    ${h.external_link('http://wold.clld.org', label='World Loanword Database, WOLD')}).
+    ${h.external_link('https://wold.clld.org', label='World Loanword Database, WOLD')}).
 </p>
 ## skos:Collection
 <p>
@@ -45,7 +45,7 @@
     If no suitably defined concept set exists, we simply
     add a new one. The combined list of all
     <a href="${request.route_url('parameters')}">concept sets</a> is our "Concepticon" in the sense of 
-    ${h.external_link("http://bibliography.lingpy.org?key=Poornima2010", label='Poornima and Good (2010)')}.
+    ${h.external_link("https://glottolog.org/resource/reference/id/evobib:Poornima2010", label='Poornima and Good (2010)')}.
 </p>
 <p>
     To each concept set, we add a rough <em>gloss</em>, but this is not
@@ -60,11 +60,12 @@
     The ontological categories are mostly added for practical reasons of
     allowing us to order and link the concepts more quickly. They should not
     be taken as a serious semantic classification of the concept lists.
-
+</p>
+<p>
     For many concepts, additional meta-data, including links to
-    ${h.external_link("https://babelnet.org", label="BabelNet")} and
-    ${h.external_link("http://www.omegawiki.org", label="OmegaWiki")},
-    are offered, will be expanded in future versions.
+    ${h.external_link("https://babelnet.org", label="BabelNet")} and OmegaWiki has been collected within
+    the Concepticon project. This data now moved to <a href="https://norare.clld.org">NoRaRe</a>,
+    the Database of Cross-Linguistic Norms, Ratings, and Relations for Words and Concepts.
 </p>
 
 <h3>Contributing</h3>
