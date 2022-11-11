@@ -32,7 +32,11 @@ ${ctx.coins(request)|n}
             % endif
             % if ctx._files:
                 <p>
-                    ${u.cdstar.link(ctx._files[0])}
+                    <a href="${ctx._files[0].jsondata}">
+                        <span>
+                            <i class="icon-file"></i> View file (${ctx._files[0].mime_type})
+                        </span>
+                    </a>
                 </p>
             % endif
         </div>

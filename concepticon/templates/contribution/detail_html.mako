@@ -26,7 +26,11 @@
                         (${ctx.datadict()['PAGES']})
                     % endif
                     % if ref.source.files:
-                        ${u.cdstar.link(ref.source._files[0])}
+                        <a href="${ref.source._files[0].jsondata}">
+                            <span>
+                                <i class="icon-file"></i> View file (${ref.source._files[0].mime_type})
+                            </span>
+                        </a>
                     % endif
                 </li>
             % endfor

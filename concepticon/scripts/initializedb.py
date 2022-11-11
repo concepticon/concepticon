@@ -85,7 +85,9 @@ def main(args):  # pragma: no cover
             spec = pdfs[rec.id]
             DBSession.flush()
             DBSession.add(common.Source_files(
-                mime_type=spec['Media_Type'], object_pk=source.pk, jsondata=spec))
+                mime_type=spec['Media_Type'],
+                object_pk=source.pk,
+                jsondata=urllib.parse.urlunsplit(spec['Download_URL'])))
 
     for concept in ds['ParameterTable']:
         data.add(

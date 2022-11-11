@@ -10,9 +10,6 @@ import itertools
 from clld.web.util.helpers import get_referents, external_link, button, icon
 from clld.web.util.htmllib import HTML
 from clld.db.models.common import Source
-from clldmpg import cdstar
-
-assert cdstar
 
 
 def github_link(ctx):
