@@ -3,7 +3,7 @@
 <%! active_menu_item = "languages" %>
 <%block name="title">${_('Language')} ${ctx.name}</%block>
 
-<h2>Concept labels in ${_('Language')} ${ctx.name}</h2>
+<h2>Concept labels in ${ctx.name}</h2>
 
 ${request.get_datatable('units', h.models.Unit, language=ctx).render()}
 

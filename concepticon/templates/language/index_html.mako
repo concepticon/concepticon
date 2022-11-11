@@ -7,7 +7,7 @@
 
 <p>
     Concepticon contains concepts glossed in many languages; although, due to the motivation behind
-    the conceptlists, with a focus on lingua francas for the targeted region of data collection.
+    the conceptlists, the focus is on lingua francas for the targeted region of data collection.
 </p>
 
 % if map_ or request.map:
