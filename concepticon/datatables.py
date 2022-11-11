@@ -1,19 +1,20 @@
 import collections
 
-from sqlalchemy import and_
+from sqlalchemy import and_, exists
 from sqlalchemy.orm import aliased, joinedload
 
 from clld.web.datatables.base import Col, LinkCol, IdCol, DetailsRowLinkCol, IntegerIdCol
 from clld.web.datatables.contribution import Contributions, ContributorsCol
 from clld.web.datatables.contributor import Contributors, NameCol, ContributionsCol
 from clld.web.datatables.parameter import Parameters
+from clld.web.datatables.language import Languages
 from clld.web.datatables.unit import Units
 from clld.web.datatables.value import Values
 from clld.web.util.helpers import linked_references
 from clld.web.util.htmllib import HTML
 from clld.db.meta import DBSession
 from clld.db.models.common import (
-    Value, Value_data, ValueSet, Parameter, Contribution, ContributionContributor,
+    Value, ValueSet, Parameter, Contribution, ContributionContributor,
     ContributionReference, Language, Unit,
 )
 from clld.db.util import get_distinct_values, icontains
@@ -257,7 +258,14 @@ class Glosses(Units):
         ] + res
 
 
+class GlossLanguages(Languages):
+    def base_query(self, query):
+        query = Languages.base_query(self, query)
+        return query.filter(DBSession.query(Unit.pk).filter(Unit.language_pk == Language.pk).exists())
+
+
 def includeme(config):
+    config.register_datatable('languages', GlossLanguages)
     config.register_datatable('parameters', ConceptSets)
     config.register_datatable('values', Concepts)
     config.register_datatable('units', Glosses)
