@@ -175,7 +175,7 @@ class Concepts(Values):
             query = query.join(ValueSet.parameter)
             query = query.options(joinedload(
                 Value.valueset).joinedload(ValueSet.parameter))
-        return query
+        return query.options(joinedload(Concept.glosses))
 
     def col_defs(self):
         res = [

@@ -10,6 +10,10 @@
                 <img width="50%" src="${req.static_url('concepticon:static/norare-logo.png')}"/>
             </a>
             <p>
+                NoRaRe offers information about specific concept and word properties published along with
+                studies from linguistics and psychology.
+            </p>
+            <p>
                 The <a href="https://norare.clld.org/parameters/${ctx.id}">corresponding entry in NoRaRe</a> is
                 linked to ${ctx.norare_variables} variables from ${ctx.norare_datasets} datasets.
             </p>

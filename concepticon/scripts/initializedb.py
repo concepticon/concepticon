@@ -48,7 +48,7 @@ def main(args):  # pragma: no cover
 
     dataset = common.Dataset(
         id=concepticon.__name__,
-        name="{0} {1}".format(ds.properties['dc:title'], version),
+        name="CLLD Concepticon {}".format(version),
         publisher_name=ds.properties["dc:publisher"]['http://xmlns.com/foaf/0.1/name'],
         publisher_place=ds.properties["dc:publisher"]['dc:Location'],
         publisher_url=ds.properties["dc:publisher"]['http://xmlns.com/foaf/0.1/homepage'],
@@ -69,7 +69,7 @@ def main(args):  # pragma: no cover
     for i, editor in enumerate(editors, start=1):
         start, to_, end = editor['Period'].strip().partition('-')
         start, end = start.strip(), end.strip()
-        if not end:
+        if to_ and (not end):
             name = editor['Name'].strip()
             c = data.add(common.Contributor, slug(name), id=slug(name), name=name)
             dataset.editors.append(common.Editor(contributor=c, ord=i))
