@@ -1,2 +1,2 @@
 ${request.dataset.formatted_editors()|n} (eds.) ${request.dataset.published.year if request.dataset.published else request.dataset.updated.year}.
-CLLD ${request.dataset.description or request.dataset.name} [Data set]. Zenodo. https://doi.org/${request.dataset.jsondata['doi']}
+${request.dataset.description or request.dataset.name} [Data set]. Zenodo. https://doi.org/${request.dataset.jsondata['doi']}

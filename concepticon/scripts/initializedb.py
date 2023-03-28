@@ -10,7 +10,7 @@ from clldutils.misc import slug
 from clldutils.apilib import assert_release
 from clldutils.clilib import confirm
 from clldutils.markup import iter_markdown_sections, iter_markdown_tables
-from cldfviz.text import CLDFMarkdownLink
+from pycldf.ext.markdown import CLDFMarkdownLink
 from markdown import markdown as _markdown
 from tqdm import tqdm
 from pycldf import Dataset

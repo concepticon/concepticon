@@ -21,7 +21,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'clld>=9.2.1',
-        'clld-markdown-plugin',
+        'clld-markdown-plugin>=0.2',
         'clldutils>=3.5',
         'clldmpg>=3.5',
         'markdown',

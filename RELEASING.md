@@ -2,9 +2,9 @@
 Releasing clld/concepticon
 ==========================
 
-- Recreate the database (in concepticon-data/):
+- Recreate the database (in concepticon-data/ passing in the DOI of the concepticon-data release):
   ```shell script
-  clld initdb development.ini
+  clld initdb development.ini --cldf ../concepticon-cldf/cldf/Wordlist-metadata.json
   ```
 
 - Make sure the tests pass (in clld/concepticon):
