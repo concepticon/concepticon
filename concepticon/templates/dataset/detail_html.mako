@@ -79,7 +79,7 @@
       <p>
           If you want to learn more about the ideas behind our Concepticon, have a look at our
           <a href="${request.route_url('about')}">about</a> page or read
-          <a href="${request.route_url('source', id='list2016a')}">List et al. 2016, presented at LREC</a>.
+          <a href="${request.route_url('source', id='List2016a')}">List et al. 2016, presented at LREC</a>.
       </p>
   </div>
   <div id="container" class="span6"></div>
