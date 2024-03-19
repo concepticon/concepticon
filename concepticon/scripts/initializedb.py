@@ -102,11 +102,11 @@ def main(args):  # pragma: no cover
             norare_variables=norare_cs[concept['ID']]['count_variables'] if concept['ID'] in norare_cs else 0,
         )
 
-    for rel in ds['conceptrelations.csv']:
+    for rel in ds['ParameterNetwork']:
         DBSession.add(models.Relation(
-            source=data['ConceptSet'][rel['Source_ID']],
-            target=data['ConceptSet'][rel['Target_ID']],
-            description=rel['Relation_ID']))
+            source=data['ConceptSet'][rel['Source_Parameter_ID']],
+            target=data['ConceptSet'][rel['Target_Parameter_ID']],
+            description=rel['relation']))
 
     for lang in ds['LanguageTable']:
         data.add(

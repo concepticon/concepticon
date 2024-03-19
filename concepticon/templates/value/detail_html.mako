@@ -1,6 +1,7 @@
 <%inherit file="../${context.get('request').registry.settings.get('clld.app_template', 'app.mako')}"/>
 <%namespace name="util" file="../util.mako"/>
 <%! active_menu_item = "values" %>
+<%! from clld_markdown_plugin import markdown %>
 
 <%def name="sidebar()">
     <%util:well>
@@ -10,7 +11,7 @@
             <dt>${_('Contribution')}:</dt>
             <dd>${h.link(request, ctx.valueset.contribution)}</dd>
             <dd>
-                ${ctx.valueset.contribution.description|n}
+                ${markdown(req, ctx.valueset.contribution.description)|n}
             </dd>
         </dl>
     </%util:well>
