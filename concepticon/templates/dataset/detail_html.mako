@@ -80,6 +80,8 @@
           If you want to learn more about the ideas behind our Concepticon, have a look at our
           <a href="${request.route_url('about')}">about</a> page or read
           <a href="${request.route_url('source', id='List2016a')}">List et al. 2016, presented at LREC</a>.
+          For details about the relation between Concepticon and NoRaRe, refer to
+          <a href="https://doi.org/10.12688/openreseurope.15380.3">Tjuka, Forkel, and List (2023) "Curating and extending data for language comparison in Concepticon and NoRaRe"</a>
       </p>
   </div>
   <div id="container" class="span6"></div>
