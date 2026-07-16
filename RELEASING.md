@@ -16,11 +16,7 @@ Releasing clld/concepticon
   ```shell
   clld create_downloads development.ini concepticon.clld.org
   ```
-
-- Upload the downloads to CDSTAR (in clld/concepticon):
-  ```shell
-  clldmpg dl2cdstar --version=<version>
-  ```
+  unzip and add as file of new version to https://doi.org/10.5281/zenodo.21396763
 
 - Commit and push all changes
   ```shell
@@ -30,6 +26,5 @@ Releasing clld/concepticon
 
 - Deploy to https://concepticon.clld.org
   ```shell
-  (appconfig)$ fab deploy:production
+  (appconfig)$ appconfig appdeploy concepticon
   ```
-

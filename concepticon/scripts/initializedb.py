@@ -87,7 +87,7 @@ def main(args):  # pragma: no cover
             DBSession.add(common.Source_files(
                 mime_type=spec['Media_Type'],
                 object_pk=source.pk,
-                jsondata=urllib.parse.urlunsplit(spec['Download_URL'])))
+                jsondata=f"https://s3.nexus.mpcdf.mpg.de/eva-dlce-concepticon/{spec['ID']}.pdf"))
 
     for concept in ds['ParameterTable']:
         data.add(

@@ -2,14 +2,6 @@
 <%namespace name="mpg" file="clldmpg_util.mako"/>
 <%namespace name="cutil" file="concepticon_util.mako"/>
 
-<%block name="head">
-    <style>
-        a.accordion-toggle {
-            font-weight: bold;
-        }
-    </style>
-</%block>
-
 <h3>Downloads</h3>
 
 <div class="alert alert-warning">
@@ -21,10 +13,8 @@
     </p>
     ${cutil.repos_info()|n}
 </div>
-${mpg.downloads(request)}
-
-<%def name="sidebar()">
-    <div class="well well-small">
-        ${mpg.downloads_legend()}
-    </div>
-</%def>
+<p>
+    Since version 1.0 a convenience format to access the concept label data in Concepticon has been
+    provided. This data is now available
+    <a href="https://doi.org/10.5281/zenodo.21396763">on Zenodo, DOI: 10.5281/zenodo.21396763</a>.
+</p>
