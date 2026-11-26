@@ -10,7 +10,7 @@ cd concepticon
 pip install -e .[test]
 ```
 
-Recreate the database (in concepticon-data/ passing in the DOI of the concepticon-data release) (DOI: 10.5281/zenodo.21373838):
+Recreate the database:
 ```shell
 clld initdb development.ini --cldf ../concepticon-cldf/cldf/Wordlist-metadata.json
 ```

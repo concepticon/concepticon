@@ -36,14 +36,14 @@ def main(args):  # pragma: no cover
     try:
         version = assert_release(ds.directory.parent)
     except AssertionError:
-        if not confirm('This seems to be a test run. Correct? ', default=False):
+        if args.assume_yes or not confirm('This seems to be a test run. Correct? ', default=False):
             raise
         version = 'x'
-    doi = input('concepticon-cldf DOI:')
+    doi = '10.5281/zenodo.7298022'
     try:
         assert re.match(r'10\.5281/zenodo\.[0-9]+', doi or ''), 'Invalid DOI'
     except AssertionError:
-        if not confirm('This seems to be a test run. Correct? ', default=False):
+        if args.assume_yes or not confirm('This seems to be a test run. Correct? ', default=False):
             raise
 
     dataset = common.Dataset(
@@ -142,8 +142,8 @@ def main(args):  # pragma: no cover
                 conceptlist=conceptlist, language=data['GlossLanguage'][glid]))
             data['GlossLanguage'][glid].count_conceptlists += 1
         for src in cl['Source']:
-            common.ContributionReference(
-                source=data['Source'][src], contribution=conceptlist)
+            DBSession.add(common.ContributionReference(
+                source=data['Source'][src], contribution=conceptlist))
 
         for tag in cl['Tags'] or ['specific']:
             DBSession.add(models.ConceptlistTag(
@@ -186,6 +186,7 @@ def main(args):  # pragma: no cover
             number_suffix=match.group('suffix'),
             jsondata=concept['Attributes'],
         )
+        DBSession.add(v)
         for gloss in glosses:
             DBSession.add(models.Gloss(
                 language=data['GlossLanguage'][gloss['Language_ID']],

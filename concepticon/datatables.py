@@ -76,7 +76,7 @@ class TagsCol(Col):
 
 class Conceptlists(Contributions):
     def base_query(self, query):
-        query = query.join(Conceptlist.tag_assocs, ConceptlistTag.tag).distinct()
+        query = query.join(Conceptlist.tag_assocs).join(ConceptlistTag.tag).distinct()
         return query.options(
             joinedload(Conceptlist.tag_assocs).joinedload(ConceptlistTag.tag),
             joinedload(
