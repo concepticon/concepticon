@@ -33,19 +33,14 @@ def main(args):  # pragma: no cover
         iter_markdown_sections(ds.directory.joinpath('CONTRIBUTORS.md').read_text(encoding='utf8'))}
     data = Data()
 
-    try:
-        version = assert_release(ds.directory.parent)
-    except AssertionError:
-        if args.assume_yes or not confirm('This seems to be a test run. Correct? ', default=False):
-            raise
-        version = 'x'
-    doi = '10.5281/zenodo.7298022'
-    try:
-        assert re.match(r'10\.5281/zenodo\.[0-9]+', doi or ''), 'Invalid DOI'
-    except AssertionError:
-        if args.assume_yes or not confirm('This seems to be a test run. Correct? ', default=False):
-            raise
+    for prov in ds.properties['prov:wasDerivedFrom']:
+        if prov.get("rdf:about") == "https://github.com/concepticon/concepticon-data":
+            version = prov['dc:created'].lstrip('v')
+            break
+    else:
+        raise ValueError('No version found')
 
+    doi = '10.5281/zenodo.7298022'
     dataset = common.Dataset(
         id=concepticon.__name__,
         name="CLLD Concepticon {}".format(version),

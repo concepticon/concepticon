@@ -51,8 +51,8 @@ class ConceptSetLabels(Download):
     ext = 'json'
     description = "Concept sets and alternative labels as JSON"
 
-    def create(self, req, filename=None, verbose=True):
-        p = self.abspath(req)
+    def create(self, req, filename=None, outfile=None, verbose=True):
+        p = outfile or self.abspath(req)
         if not p.parent.exists():  # pragma: no cover
             p.parent.mkdir()
         tmp = pathlib.Path('%s.tmp' % p.as_posix())
@@ -78,7 +78,7 @@ def create():
     for cs in DBSession.query(Parameter) \
             .options(
                 joinedload(Parameter.valuesets)
-                .joinedload(ValueSet.values)
+                .joinedload(ValueSet.values.of_type(Concept))
                 .joinedload(Concept.glosses)) \
             .order_by(Parameter.name):
         if int(cs.id):
