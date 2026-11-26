@@ -15,11 +15,6 @@ Recreate the database:
 clld initdb development.ini --cldf ../concepticon-cldf/cldf/Wordlist-metadata.json
 ```
 
-Make sure the tests pass (in clld/concepticon):
-```shell
-pytest
-```
-
 Create downloads (in clld/concepticon):
 ```shell
 clld create_downloads development.ini concepticon.clld.org
@@ -46,4 +41,3 @@ Store a db dump:
 ```shell
 pg_dump -xO --compress gzip:9 concepticon > concepticon.sql.gz
 ```
-
